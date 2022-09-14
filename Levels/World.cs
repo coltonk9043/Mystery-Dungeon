@@ -1,11 +1,11 @@
 ﻿// Colton K
 // A class representing the ingame world.
-using Dungeon.World;
+using Dungeon.Levels;
 using Dungeon.Lighting;
 using DungeonGame.Entities;
 using DungeonGame.Entities.NPCs;
 using DungeonGame.Entities.Player;
-using DungeonGame.World.TerrainFeatures;
+using DungeonGame.Levels.TerrainFeatures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,10 +15,11 @@ using System.Collections.Generic;
 using System.IO;
 using Ray = Dungeon.Lighting.Ray;
 using BoundingBox = DungeonGame.Entities.BoundingBox;
-using Dungeon.World.TerrainFeatures;
+using Dungeon.Levels.TerrainFeatures;
 using Dungeon.Entities;
+using Dungeon.Projectiles;
 
-namespace DungeonGame.World
+namespace DungeonGame.Levels
 {
     public class World
     {
@@ -73,10 +74,9 @@ namespace DungeonGame.World
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="layers"></param>
-        public World(string dungeonName, Game1 game, int width, int height, int layers)
+        public World(string dungeonName, int width, int height, int layers)
         {
-            this.game = game;
-
+            this.game = Game1.getInstance();
             this.dungeonName = dungeonName;
             this.renderTargetShadows = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             this.renderTargetWorld = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
@@ -123,10 +123,10 @@ namespace DungeonGame.World
         /// <param name="dungeonName"></param>
         /// <param name="game"></param>
         /// <param name="contentManager"></param>
-        public World(string dungeonName, Game1 game, ContentManager contentManager)
+        public World(string dungeonName)
         {
             WriteDefaultValues(dungeonName);
-            this.game = game;
+            this.game = Game1.getInstance(); ;
             this.dungeonName = dungeonName;
             this.renderTargetShadows = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             this.renderTargetWorld = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
@@ -134,9 +134,9 @@ namespace DungeonGame.World
             this.renderTargetDynamicLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             this.renderTargetStaticLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             this.renderTargetLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.shadowMask = contentManager.Load<Effect>("ShadowMask");
-            this.lightingEffect = contentManager.Load<Effect>("Lighting");
-            this.lightingTexture = contentManager.Load<Texture2D>("Textures/Lighting/Torch");
+            this.shadowMask = game.contentManager.Load<Effect>("ShadowMask");
+            this.lightingEffect = game.contentManager.Load<Effect>("Lighting");
+            this.lightingTexture = game.contentManager.Load<Texture2D>("Textures/Lighting/Torch");
             // Reads from a file representing the tile 
             if (File.Exists(dungeonName))
             {
@@ -178,11 +178,11 @@ namespace DungeonGame.World
                         {
                             case "tree":
                                 binaryReader.ReadInt32();
-                                this.entityList.Add((Entity)new TreeEntity(new Vector3((float)binaryReader.ReadInt32(), (float)binaryReader.ReadInt32(), 0.0f)));
+                                this.entityList.Add(new TreeEntity(new Vector3(binaryReader.ReadInt32(), binaryReader.ReadInt32(), 0.0f)));
                                 break;
                             case "torch":
                                 binaryReader.ReadInt32();
-                                this.entityList.Add((Entity)new TorchEntity(new Vector3((float)binaryReader.ReadInt32(), (float)binaryReader.ReadInt32(), 0.0f)));
+                                this.entityList.Add(new TorchEntity(new Vector3(binaryReader.ReadInt32(), binaryReader.ReadInt32(), 0.0f)));
                                 break;
                             default:
                                 continue;
@@ -236,6 +236,38 @@ namespace DungeonGame.World
             this.addEntity((Entity)new ItemEntity(new Vector3(300f, 275f, 0.0f), Game1.Items.GetItem("tungsten_knife")));
         }
 
+        public World(int width, int height, int numLayers, Layer[] layers)
+        {
+            this.game = Game1.getInstance();
+            this.dungeonName = dungeonName;
+            this.renderTargetShadows = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            this.renderTargetWorld = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            this.renderTargetEntities = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            this.renderTargetDynamicLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            this.renderTargetStaticLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            this.renderTargetLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
+            this.shadowMask = game.contentManager.Load<Effect>("ShadowMask");
+            this.lightingEffect = game.contentManager.Load<Effect>("Lighting");
+            this.lightingTexture = game.contentManager.Load<Texture2D>("Textures/Lighting/Torch");
+            this.sizeX = width;
+            this.sizeY = height;
+            this.layers = numLayers;
+
+            this.tilesetTextureFile = "Textures/Tiles/default_floor_tileset";
+
+            this.tileTextures = TextureUtils.createTextureArrayFromFile(this.tilesetTextureFile, 16, 16);
+
+            // Precalculates shadow indicices for efficiency.
+            for (int i = 0; i < rays; i++)
+            {
+                ind[(i * 3)] = 0;
+                ind[(i * 3) + 1] = i;
+                ind[(i * 3) + 2] = i + 1;
+            }
+
+            this.tiles = layers;
+        }
+
         /// <summary>
         /// Saves the current world. TODO: Change to be specific to the World Editor GUI.
         /// </summary>
@@ -263,6 +295,8 @@ namespace DungeonGame.World
             }
         }
 
+
+
         /// <summary>
         /// Toggles the gridmap on or off.
         /// </summary>
@@ -279,6 +313,15 @@ namespace DungeonGame.World
         /// <param name="gameTime"></param>
         public void Update(GameTime gameTime)
         {
+            if (this.game.mouseHelper.getLeftClicked())
+            {
+                Vector2 mousePos = this.game.mainCamera.getMousePositionRelativeToWorld();
+                Vector3 newVelocity = Vector3.Normalize(new Vector3(mousePos.X, mousePos.Y, 0) - this.game.player.position) * 10;
+                float rotation = (float)Math.Atan2(mousePos.X - this.game.player.position.X, mousePos.Y - this.game.player.position.Y);
+                Projectile newProj = new Projectile(this.game.player.position + new Vector3(this.game.player.GetTexture().Width / 2, this.game.player.GetTexture().Height / 2, 0), newVelocity, rotation, 0, this.game.player);
+                this.addEntity(newProj);
+            }
+
             /*
              * Section of the update function to manage Time.
              */
@@ -355,6 +398,7 @@ namespace DungeonGame.World
                     entity.RenderEntityShadow(spriteBatch);
                     if (entity is TerrainEntity)
                     {
+                        if (entity.GetBoundingBox() == null) continue;
                         boundingList.Add(new Edge(entity.GetBoundingBox().X, entity.GetBoundingBox().Y, entity.GetBoundingBox().X + entity.GetBoundingBox().Width, entity.GetBoundingBox().Y));
                         boundingList.Add(new Edge(entity.GetBoundingBox().X + entity.GetBoundingBox().Width, entity.GetBoundingBox().Y, entity.GetBoundingBox().X + entity.GetBoundingBox().Width, entity.GetBoundingBox().Y + entity.GetBoundingBox().Height));
                         boundingList.Add(new Edge(entity.GetBoundingBox().X, entity.GetBoundingBox().Y + entity.GetBoundingBox().Height, entity.GetBoundingBox().X + entity.GetBoundingBox().Width, entity.GetBoundingBox().Y + entity.GetBoundingBox().Height));
@@ -457,7 +501,7 @@ namespace DungeonGame.World
                     entity.Render(spriteBatch);
                 if(entity is ILightSource)
                 {
-                    lightPosition[currentLightIndex] = new Vector3((entity.position.X * 4) - (this.game.mainCamera.position.X * 4) + (this.game.GraphicsDevice.Viewport.Width / 2),  -(entity.position.Y * 4) + (this.game.mainCamera.position.Y * 4) + (this.game.GraphicsDevice.Viewport.Height / 2), 0);
+                    lightPosition[currentLightIndex] = Vector3.Transform(entity.position, this.game.mainCamera.GetLightingTransform());
                     lightColour[currentLightIndex] = ((ILightSource)entity).Color.ToVector4();
                     lightIntensity[currentLightIndex] = ((ILightSource)entity).Intensity;
                     lightRadius[currentLightIndex] = ((ILightSource)entity).Radius;
@@ -480,6 +524,7 @@ namespace DungeonGame.World
             // Sort Lighting to be 
 
             this.lightingEffect.Parameters["DiffuseLighting"].SetValue(this.skyColor.ToVector4());
+            //this.lightingEffect.Parameters["DiffuseLighting"].SetValue(new Vector4(255,255,255,255));
 
             this.lightingEffect.Parameters["LightPosition"].SetValue(lightPosition);
             this.lightingEffect.Parameters["LightColour"].SetValue(lightColour);
@@ -729,6 +774,10 @@ namespace DungeonGame.World
                 binaryWriter.Write(0);
                 binaryWriter.Write(15);
                 binaryWriter.Write(75);
+                binaryWriter.Write("torch");
+                binaryWriter.Write(0);
+                binaryWriter.Write(250);
+                binaryWriter.Write(500);
             }
         }
     }

@@ -43,6 +43,8 @@ namespace DungeonGame.Entities
         /// <returns>The intersection between the other bounding box.</returns>
         public BoundingBox Intersection(BoundingBox bb)
         {
+            if (bb == null) return null;
+
             float x1 = this.X + this.Width;
             float x2 = bb.X + bb.Width;
             float y1 = this.Y + this.Height;

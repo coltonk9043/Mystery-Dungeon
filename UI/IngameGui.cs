@@ -17,7 +17,7 @@ namespace DungeonGame.UI
         private ClientPlayer player;
         private FrameCounter frameCounter;
         private bool debugEnabled;
-
+        
         private Texture2D HPBackgroundL;
         private Texture2D StaminaBackgroundL;
         private Texture2D ManaBackgroundL;

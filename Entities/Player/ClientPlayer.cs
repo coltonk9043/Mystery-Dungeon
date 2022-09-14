@@ -1,19 +1,13 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: DungeonGame.Entities.Player.ClientPlayer
-// Assembly: DungeonGame, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
-// Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
-
-using Dungeon.Entities;
+﻿using Dungeon.Entities;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using static DungeonGame.World.World;
+using static DungeonGame.Levels.World;
 
 namespace DungeonGame.Entities.Player
 {
-    public class ClientPlayer : AbstractPlayer, ILightSource
+    public class ClientPlayer : AbstractPlayer
     {
         public int currentHotbar = 0;
 
@@ -23,9 +17,7 @@ namespace DungeonGame.Entities.Player
             this.boundingBox = new DungeonGame.Entities.BoundingBox(this.position.X, this.position.Y, 12f, 4f);
         }
 
-        public Color Color { get => new Color(246, 154, 84, 255); set => throw new NotImplementedException(); }
-        public float Radius { get => 20000.0f; set => throw new NotImplementedException(); }
-        public float Intensity { get => 1.0f; set => throw new NotImplementedException(); }
+
 
         public override void MovePlayer(GameTime gameTime)
         {

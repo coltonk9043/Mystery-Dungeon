@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using System;
 using BoundingBox = DungeonGame.Entities.BoundingBox;
 
-namespace DungeonGame.World.TerrainFeatures
+namespace DungeonGame.Levels.TerrainFeatures
 {
     public class TerrainEntity : Entity
     {

@@ -1,10 +1,12 @@
 ﻿// Colton K
 // Main Class for Dungeon Game
 
+using Dungeon.Levels;
 using DungeonGame.Entities;
 using DungeonGame.Entities.Enemies;
 using DungeonGame.Entities.Player;
 using DungeonGame.Item;
+using DungeonGame.Levels;
 using DungeonGame.UI;
 using DungeonGame.UI.Menus;
 using DungeonGame.UI.Widgets;
@@ -26,7 +28,8 @@ namespace DungeonGame
         public GraphicsDeviceManager _graphics;
         private SpriteBatch _spriteBatch;
         public MouseHelper mouseHelper;
-        public DungeonGame.World.World currentWorld;
+        private WorldGenerator worldGenerator;
+        public World currentWorld;
         public ClientPlayer player;
         public Camera mainCamera;
         private FrameCounter framerateCounter = new FrameCounter();
@@ -80,7 +83,9 @@ namespace DungeonGame
             this.font = this.Content.Load<SpriteFont>("Arial");
             _blur = this.Content.Load<Effect>("Blur");
             Game1.Items = new Items();
-            this.currentWorld = new DungeonGame.World.World("dev", this, this.contentManager);
+            //this.currentWorld = new DungeonGame.Levels.World("dev");
+            worldGenerator = new WorldGenerator(100, 100);
+            this.currentWorld = worldGenerator.Generate();
             this.currentWorld.addEntity(new EntityBat(new Vector3(35f, 40f, 0.0f)));
             this.player = new ClientPlayer(this.Content.Load<Texture2D>("Textures/player"), new Vector3(20f, 50f, 0.0f));
             this.currentWorld.addPlayer(this.player);

@@ -38,7 +38,12 @@ namespace DungeonGame.Entities
         /// Gets the transformation matrix of the camera.
         /// </summary>
         /// <returns></returns>
-        public Matrix GetTransform() => Matrix.CreateTranslation(-this.position.X, -this.position.Y - (float)(this.entityToFollow.GetTexture().Height / 2), 0.0f) * Matrix.CreateScale(new Vector3(this.zoom, this.zoom, 1f)) * Matrix.CreateTranslation((float)(Game1.ScreenWidth / 2), (float)(Game1.ScreenHeight / 2), 0.0f);
+        public Matrix GetTransform() => Matrix.CreateTranslation(-this.position.X, -this.position.Y - (this.entityToFollow.GetTexture().Height / 2), 0.0f) * Matrix.CreateScale(new Vector3(this.zoom, this.zoom, 1f)) * Matrix.CreateTranslation((float)(Game1.ScreenWidth / 2), (float)(Game1.ScreenHeight / 2), 0.0f);
+
+        public Matrix GetLightingTransform() => Matrix.CreateTranslation(-this.position.X, -this.position.Y - (this.entityToFollow.GetTexture().Height / 2), 0.0f) * Matrix.CreateScale(new Vector3(this.zoom, -this.zoom, 1f)) * Matrix.CreateTranslation((float)(Game1.ScreenWidth / 2), (float)(Game1.ScreenHeight / 2), 0.0f);
+
+
+
 
         /// <summary>
         /// Gets the mouse position relative to the world.
@@ -47,7 +52,7 @@ namespace DungeonGame.Entities
         public Vector2 getMousePositionRelativeToWorld()
         {
             Vector2 position = Game1.getInstance().mouseHelper.getPosition();
-            return new Vector2((this.position.X * this.zoom + position.X - (float)(Game1.ScreenWidth / 2)) / this.zoom, (this.position.Y * this.zoom + position.Y - (float)(Game1.ScreenHeight / 2)) / this.zoom);
+            return new Vector2((this.position.X * this.zoom + position.X - (float)(Game1.ScreenWidth / 2) + this.entityToFollow.GetTexture().Width) / this.zoom, (this.position.Y * this.zoom + position.Y - (float)(Game1.ScreenHeight / 2) + this.entityToFollow.GetTexture().Height) / this.zoom);
         }
 
         public void setZoom(float zoom) => this.zoom = zoom;

@@ -1,13 +1,14 @@
 ﻿// Colton K
 // An abstract class for an Entity in the game.
-using DungeonGame.World;
-using DungeonGame.World.TerrainFeatures;
+using Dungeon.Projectiles;
+using DungeonGame.Levels;
+using DungeonGame.Levels.TerrainFeatures;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using static DungeonGame.World.World;
+using static DungeonGame.Levels.World;
 
 namespace DungeonGame.Entities
 {
@@ -51,7 +52,7 @@ namespace DungeonGame.Entities
         /// </summary>
         /// <param name="gameTime"></param>
         /// <param name="world"></param>
-        public void Update(GameTime gameTime, World.World world)
+        public void Update(GameTime gameTime, Levels.World world)
         {
             // If the entity is animated, update the animation.
             if (this.animated)
@@ -67,24 +68,35 @@ namespace DungeonGame.Entities
             float nextPosY = this.position.Y + this.velocity.Y;
 
             // Creates a new bounding box to check whether or not the next position is inside of a collidable tile/entity.
-            BoundingBox bb = new BoundingBox(nextPosX - (this.boundingBox.Width / 2f), nextPosY - this.boundingBox.Height, boundingBox.Width, boundingBox.Height);
-            this.checkWorldCollision(bb, world, nextPosX, nextPosY);
-            this.checkEntityCollisions(bb);
+            if(this.boundingBox != null)
+            {
+                BoundingBox bb = new BoundingBox(nextPosX - (this.boundingBox.Width / 2f), nextPosY - this.boundingBox.Height, boundingBox.Width, boundingBox.Height);
+                this.checkWorldCollision(bb, world, nextPosX, nextPosY);
+                this.checkEntityCollisions(bb);
+            }
+
             
             // Update player's position and bounding box accordingly.
             this.position.X += this.velocity.X;
             this.position.Y += this.velocity.Y;
-            this.boundingBox.X = this.position.X - this.boundingBox.Width / 2f;
-            this.boundingBox.Y = this.position.Y - this.boundingBox.Height ;
+            if (this.boundingBox != null)
+            {
+                this.boundingBox.X = this.position.X - this.boundingBox.Width / 2f;
+                this.boundingBox.Y = this.position.Y - this.boundingBox.Height;
+            }
         }
 
         public abstract void Render(SpriteBatch spriteBatch);
 
         public abstract void onMouseClicked();
 
-        public virtual void RenderEntityShadow(SpriteBatch spriteBatch) => spriteBatch.Draw(this.entityShadow, new Vector2(this.position.X - (float)(this.entityShadow.Width / 2), this.position.Y - (float)(this.entityShadow.Height / 2)), new Rectangle?(new Rectangle(0, 0, this.entityShadow.Width, this.entityShadow.Height)), Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
+        public virtual void RenderEntityShadow(SpriteBatch spriteBatch)
+        {
+            if (this.entityShadow == null) return;
+            spriteBatch.Draw(this.entityShadow, new Vector2(this.position.X - (float)(this.entityShadow.Width / 2), this.position.Y - (float)(this.entityShadow.Height / 2)), new Rectangle?(new Rectangle(0, 0, this.entityShadow.Width, this.entityShadow.Height)), Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
+        }
 
-        public void checkWorldCollision(BoundingBox currentBoundingBox, World.World world, float posX, float posY)
+        public void checkWorldCollision(BoundingBox currentBoundingBox, Levels.World world, float posX, float posY)
         {
             Vector2 entityPosAsTilePos = this.GetPositionAsTilePos(posX, posY);
             BoundingBox boundingBox1 = new BoundingBox(currentBoundingBox.X, this.boundingBox.Y, this.boundingBox.Width, this.boundingBox.Height);
@@ -126,7 +138,7 @@ namespace DungeonGame.Entities
             {
                 if (this != entity)
                 {
-                    if (entity is LivingEntity || entity is ItemEntity)
+                    if (entity is LivingEntity || entity is ItemEntity || entity is Projectile)
                     {
                         if (this.boundingBox.Intersection(entity.boundingBox) != null)
                             this.handleCollision(entity);

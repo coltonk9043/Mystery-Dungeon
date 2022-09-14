@@ -224,18 +224,6 @@
 /processorParam:TextureFormat=Color
 /build:Textures/david.png
 
-#begin Textures/default_floor_tileset.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/default_floor_tileset.png
-
 #begin Textures/dialogueBox.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -271,6 +259,18 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/entity_shadow.png
+
+#begin Textures/fireball.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/fireball.png
 
 #begin Textures/GUI/BarBackground_MID.png
 /importer:TextureImporter

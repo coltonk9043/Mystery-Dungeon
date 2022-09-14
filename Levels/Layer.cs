@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Dungeon.World
+namespace DungeonGame.Levels
 {
     public class Layer
     {

@@ -2,18 +2,22 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
+using System.Collections.Generic;
 
 namespace DungeonGame.Entities
 {
     public class LivingEntity : Entity
     {
+        // Animation Variables
         public Animation NorthFacingAnim;
         public Animation EastFacingAnim;
         public Animation SouthFacingAnim;
         public Animation WestFacingAnim;
-        private float movementSpeed = 1f;
-        private float maxHP = 100f;
-        private float hp = 100f;
+
+        // Character Variables
+        protected float movementSpeed = 1f;
+        protected float maxHP = 100f;
+        protected float hp = 100f;
         protected float timeSinceLastSwung;
         protected float attackSpeed = 1f;
         protected int attackDamage = 1;
@@ -21,8 +25,12 @@ namespace DungeonGame.Entities
         protected bool wasHit;
         protected float hitColor;
         protected float timeLastHit;
-        private ItemStack currentItem;
+        protected ItemStack currentItem;
         protected bool currentSwinging;
+
+        // Pathfinding Variables
+        protected List<Vector2> path;
+
 
         public float MovementSpeed { get { return movementSpeed; } set { movementSpeed = value; } }
         public float MaxHP { get { return maxHP; } set { maxHP = value; } }

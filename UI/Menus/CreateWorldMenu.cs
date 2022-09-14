@@ -4,6 +4,7 @@
 // MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
+using DungeonGame.Levels;
 using DungeonGame.UI.Widgets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -72,7 +73,7 @@ namespace DungeonGame.UI.Menus
             int width = Int32.Parse(this.xField.getText());
             int height = Int32.Parse(this.yField.getText());
             int layers = Int32.Parse(this.layersField.getText());
-            instance.currentWorld = new World.World(this.worldNameField.getText(), instance, width, height, layers);
+            instance.currentWorld = new World(this.worldNameField.getText(), width, height, layers);
             instance.setCurrentScreen(null);
         }
     }
