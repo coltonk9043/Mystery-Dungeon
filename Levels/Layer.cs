@@ -68,6 +68,8 @@ namespace DungeonGame.Levels
         /// <param name="tile"></param>
         public void setTile(int posX, int posY, int tile)
         {
+            if (posX >= this.width) return;
+            if (posY >= this.height) return;
             this.tiles[posX, posY] = tile;
         }
 

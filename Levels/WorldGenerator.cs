@@ -8,6 +8,7 @@ namespace Dungeon.Levels
 {
     public class WorldGenerator
     {
+        // Varianles
         private int width;
         private int height;
 
@@ -23,8 +24,11 @@ namespace Dungeon.Levels
 
         public World Generate()
         {
+            /* Uses a BSP in order to generate 'rooms'. It splits a container (A space given an x,y,width,height) into subsections
+             * and then generates rooms into each of these subsections 
+             */
             Container container = new Container(0, 0, width, height);
-            RoomTree map = this.GenerateBSP(container, 5);
+            RoomTree map = this.GenerateBSP(container, 3);
 
             Layer[] tiles = new Layer[4];
             tiles[0] = new Layer(width, height, true, false);
@@ -37,19 +41,18 @@ namespace Dungeon.Levels
             for (int i = 0; i < leafs.Length; i++)
             {
                 Container c = leafs[i];
-                int x = c.x + random.Next(0, (int)Math.Floor((double)(c.width / 3)));
-                int y = c.y + random.Next(0, (int)Math.Floor((double)(c.height / 3)));
+                int x = c.x + random.Next(0, c.width / 2);
+                int y = c.y + random.Next(0, c.height / 2);
                 int w = c.width - (x - c.x);
                 int h = c.height - (y - c.y);
-                w -= random.Next(0, w / 3);
-                h -= random.Next(0, w / 3);
 
-                for(int x1 = x; x1 <= w; x1++)
+                for (int j = x; j < x + w; j++)
                 {
-                    for (int y1 = y; y1 <= h; y1++)
+                    for (int k = y; k < y + h; k++)
                     {
-                        tiles[1].setTile(x1, y1, 2);
+                        tiles[1].setTile(j, k, 2);
                     }
+                    
                 }
             }
 
@@ -61,12 +64,15 @@ namespace Dungeon.Levels
 
         private RoomTree GenerateBSP(Container container, int iterations)
         {
+            // Given a map size, split it into smaller subsections.
             RoomTree root = new RoomTree(container);
-            if (iterations == 0)
+            // If there are no more iterations, return the current root.
+            if (iterations <= 0)
             {
                 return root;
             }
             else
+            // Otherwise, continue to split until the tree is generated.
             {
                 Container[] split = SplitContainers(container);
                 root.SetLeftChild(GenerateBSP(split[0], iterations - 1));
@@ -78,30 +84,19 @@ namespace Dungeon.Levels
         private Container[] SplitContainers(Container container)
         {
             Container[] containers = new Container[2];
-            if(random.Next(0,1) == 0)
+
+            float ratio = (float)Math.Min(0.65, Math.Max(0.35, random.NextDouble()));
+
+            if (random.Next(0, 1) == 0)
             {
-                float ratio1 = 0;
-                float ratio2 = 0;
-
-                while(ratio1 < 0.45f || ratio2 < 0.45f)
-                {
-                    containers[0] = new Container(container.x, container.y, random.Next(1, container.width), container.height);
-                    containers[1] = new Container(container.x + containers[0].width, container.y, container.width - containers[0].width, container.height);
-
-                    ratio1 = containers[0].width / containers[0].height;
-                    ratio2 = containers[1].width / containers[1].height;
-                }
+                containers[0] = new Container(container.x, container.y, (int)Math.Floor((float)container.width * ratio), container.height);
+                containers[1] = new Container(container.x + containers[0].width, container.y, container.width - containers[0].width, container.height);
             }
             else
             {
-                containers[0] = new Container(container.x, container.y, container.width , random.Next(1, container.height));
-                containers[1] = new Container(container.x , container.y + containers[0].height, container.width, container.height - containers[0].height);
-                //float ratio1 = containers[0].height / containers[0].width;
-                //float ratio2 = containers[1].height / containers[1].width;
-                //if (ratio1 < 0.45 || ratio2 < 0.45)
-                //{
-                //    return SplitContainers(container);
-                //}
+                containers[0] = new Container(container.x, container.y, container.width, (int)Math.Floor((float)container.height * ratio));
+                containers[1] = new Container(container.x, container.y + containers[0].height, container.width, container.height - containers[0].height);
+
             }
             return containers;
         }
@@ -120,9 +115,9 @@ namespace Dungeon.Levels
 
         public Container[] GetLeafs()
         {
-            if(this.LeftChild == null && this.RightChild == null)
+            if (this.LeftChild == null && this.RightChild == null)
             {
-                return new Container[1] {this.Leaf}; ;
+                return new Container[1] { this.Leaf };
             }
             else
             {
@@ -133,7 +128,7 @@ namespace Dungeon.Levels
                 Array.Copy(rightLeafs, 0, combined, leftLeafs.Length, rightLeafs.Length);
                 return combined;
             }
-            
+
         }
 
         public void SetLeftChild(RoomTree roomTree)
@@ -162,7 +157,7 @@ namespace Dungeon.Levels
             this.y = y;
             this.width = Math.Max(w, 2);
             this.height = Math.Max(h, 2);
-            this.center = new Vector2((this.x + this.width / 2), (this.y + this.height / 2));
+            this.center = new Vector2((this.x + (this.width / 2)), (this.y + (this.height / 2)));
         }
     }
 }

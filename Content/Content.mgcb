@@ -13,12 +13,6 @@
 
 #---------------------------------- Content ---------------------------------#
 
-#begin ../../Content/Sounds/buttonClick.mp3
-/importer:Mp3Importer
-/processor:SoundEffectProcessor
-/processorParam:Quality=Best
-/build:../../Content/Sounds/buttonClick.mp3;Sounds/buttonClick.mp3
-
 #begin Arial.spritefont
 /importer:FontDescriptionImporter
 /processor:FontDescriptionProcessor
@@ -43,6 +37,12 @@
 /processor:EffectProcessor
 /processorParam:DebugMode=Auto
 /build:ShadowMask.fx
+
+#begin Sounds/buttonClick.mp3
+/importer:Mp3Importer
+/processor:SoundEffectProcessor
+/processorParam:Quality=Best
+/build:Sounds/buttonClick.mp3
 
 #begin Sounds/dialogue.mp3
 /importer:Mp3Importer

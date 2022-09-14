@@ -81,10 +81,10 @@ namespace DungeonGame
         {
             this._spriteBatch = new SpriteBatch(this.GraphicsDevice);
             this.font = this.Content.Load<SpriteFont>("Arial");
-            _blur = this.Content.Load<Effect>("Blur");
+            //_blur = this.Content.Load<Effect>("Blur");
             Game1.Items = new Items();
             //this.currentWorld = new DungeonGame.Levels.World("dev");
-            worldGenerator = new WorldGenerator(100, 100);
+            worldGenerator = new WorldGenerator(50, 50);
             this.currentWorld = worldGenerator.Generate();
             this.currentWorld.addEntity(new EntityBat(new Vector3(35f, 40f, 0.0f)));
             this.player = new ClientPlayer(this.Content.Load<Texture2D>("Textures/player"), new Vector3(20f, 50f, 0.0f));
