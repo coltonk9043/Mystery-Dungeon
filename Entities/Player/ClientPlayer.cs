@@ -17,10 +17,9 @@ namespace DungeonGame.Entities.Player
             this.boundingBox = new DungeonGame.Entities.BoundingBox(this.position.X, this.position.Y, 12f, 4f);
         }
 
-
-
         public override void MovePlayer(GameTime gameTime)
         {
+            
             this.velocity = new Vector3(0.0f, 0.0f, 0.0f);
             if (this.showingItem)
                 return;

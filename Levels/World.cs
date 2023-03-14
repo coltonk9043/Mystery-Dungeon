@@ -307,6 +307,11 @@ namespace DungeonGame.Levels
 
         public Texture2D[] getTileTextures() => this.tileTextures;
 
+        public void FixedUpdate(GameTime gameTime)
+        {
+
+        }
+
         /// <summary>
         /// Update function that updates the world and all of the entities within.
         /// </summary>
