@@ -49,6 +49,11 @@ namespace DungeonGame
         private Gui currentScreen = (Gui)null;
         public static Effect _blur;
 
+        // Timer Variables
+        private int timeSteps = 60;
+        private float millisecond_interval;
+        private float elapsed_delta = 0.0f;
+
         public Game1()
         {
             Game1.instance = this;
@@ -60,6 +65,7 @@ namespace DungeonGame
             this.Content.RootDirectory = "Content";
             this.IsMouseVisible = false;
             this.contentManager = this.Content;
+            this.millisecond_interval = 1.0f / timeSteps;
         }
 
         public Gui getCurrentScreen() => this.currentScreen;
@@ -83,9 +89,9 @@ namespace DungeonGame
             this.font = this.Content.Load<SpriteFont>("Arial");
             //_blur = this.Content.Load<Effect>("Blur");
             Game1.Items = new Items();
-            //this.currentWorld = new DungeonGame.Levels.World("dev");
-            worldGenerator = new WorldGenerator(50, 50);
-            this.currentWorld = worldGenerator.Generate();
+            this.currentWorld = new DungeonGame.Levels.World("dev");
+            //worldGenerator = new WorldGenerator(50, 50);
+            //this.currentWorld = worldGenerator.Generate();
             this.currentWorld.addEntity(new EntityBat(new Vector3(35f, 40f, 0.0f)));
             this.player = new ClientPlayer(this.Content.Load<Texture2D>("Textures/player"), new Vector3(20f, 50f, 0.0f));
             this.currentWorld.addPlayer(this.player);
@@ -102,14 +108,20 @@ namespace DungeonGame
         protected override void Update(GameTime gameTime)
         {
             this.mouseHelper.Update();
-            if (this.currentScreen != null)
+            if (this.currentScreen != null && !this.currentScreen.isIngame)
             {
-                if (this.currentScreen.isIngame)
-                    this.UpdateGame(gameTime);
                 this.currentScreen.Update(gameTime, this.mouseHelper);
             }
-            else
-                this.UpdateGame(gameTime);
+            else 
+            { 
+                elapsed_delta += gameTime.ElapsedGameTime.Milliseconds;
+                if (elapsed_delta >= millisecond_interval)
+                {
+                    FixedUpdateGame(gameTime);
+                    elapsed_delta = 0.0f;
+                }
+            }
+            this.UpdateGame(gameTime);
             base.Update(gameTime);
         }
 
@@ -152,6 +164,11 @@ namespace DungeonGame
             }
             else
                 this.ingameGui.Update(gameTime, this.mouseHelper);
+        }
+
+        public void FixedUpdateGame(GameTime gameTime)
+        {
+            this.currentWorld.FixedUpdate(gameTime);
         }
 
         public void RenderGame(GameTime gameTime)
