@@ -7,7 +7,8 @@
 	#define PS_SHADERMODEL ps_4_0_level_9_1
 #endif
 
-#define MAX_LIGHTS 2
+#define MAX_LIGHTS 32
+#define PIXEL_SIZE 6.0f
 
 // Ambient Lighting
 float4 DiffuseLighting;
@@ -17,6 +18,7 @@ float3 LightPosition[MAX_LIGHTS];
 float4 LightColour[MAX_LIGHTS];
 float LightIntensity[MAX_LIGHTS];
 float LightRadius[MAX_LIGHTS];
+int LightCount;
 
 // Screen texture that we are overlaying onto.
 Texture2D ScreenTexture;
@@ -45,29 +47,34 @@ float4 MainPS(VertexShaderOutput input) : COLOR
 {
 	float initialAlpha = input.Colour.a;
 	
-	float lightDistance1 = pow(input.Position.x - LightPosition[0].x, 2) + pow(input.Position.y - LightPosition[0].y, 2);
-	float lightDistance2 = pow(input.Position.x - LightPosition[1].x, 2) + pow(input.Position.y - LightPosition[1].y, 2);
+    float4 resultingColor = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	
+    for (int i = 0; i < LightCount; i++)
+    {
+        float2 flooredPosition = floor(input.Position / PIXEL_SIZE) * PIXEL_SIZE;
+        float3 flooredLightPosition = floor(LightPosition[i] / PIXEL_SIZE) * PIXEL_SIZE;
+		
+        float lightDistance = pow(flooredPosition.x - flooredLightPosition.x, 2) + pow(flooredPosition.y - flooredLightPosition.y, 2);
 
-	float4 textureColour;
-	float4 colour, colour1, colour2;
+        float4 textureColour;
+        float4 lightColor;
+		
+		// Determine the diffuse color amount of each light.
+        lightColor = (LightColour[i] * LightIntensity[i]) * max(0, (1 - lightDistance / LightRadius[i]));
+        resultingColor += lightColor;
+    }
 
+    float4 textureColour = ScreenTexture.Sample(SampleType, input.TextureCoordinates);
 
-	// Determine the diffuse color amount of each light.
-    	colour1 = (LightColour[0] * LightIntensity[0]) * max(0, (1 - lightDistance1 / LightRadius[0]));
-    	colour2 = (LightColour[1] * LightIntensity[1]) * max(0, (1 - lightDistance2 / LightRadius[1]));
-
-	textureColour = ScreenTexture.Sample(SampleType, input.TextureCoordinates);
-
-	colour = saturate(DiffuseLighting + colour1 + colour2) * textureColour;
+    float4 colour = saturate(DiffuseLighting + resultingColor) * textureColour;
 	
 	// Uses a mask in order to replicate raycasting.
-	float4 maskColor = tex2D(MaskTextureSampler, input.TextureCoordinates);
-	colour.r = colour.r * max(1.0f - maskColor.r, 0.1f);
-	colour.g = colour.g * max(1.0f - maskColor.g, 0.1f);
-	colour.b = colour.b * max(1.0f - maskColor.b, 0.1f);
-
+	//float4 maskColor = tex2D(MaskTextureSampler, input.TextureCoordinates);
+	//colour.r = colour.r * max(1.0f - maskColor.r, 0.1f);
+	//colour.g = colour.g * max(1.0f - maskColor.g, 0.1f);
+	//colour.b = colour.b * max(1.0f - maskColor.b, 0.1f);
 	//colour.a = initialAlpha;
-    	return colour;
+    return colour;
 }
 
 technique SpriteDrawing

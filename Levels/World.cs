@@ -49,7 +49,7 @@ namespace DungeonGame.Levels
         private List<AbstractPlayer> playerList = new List<AbstractPlayer>();
 
         // Realtime Lighting Variables
-        private float time = 0.0f;
+        private float time = 13000.0f;
         private Color skyColor = new Color(255,255,255);
         private float skyAlpha;
         private const int rays = 360;
@@ -331,7 +331,7 @@ namespace DungeonGame.Levels
              * Section of the update function to manage Time.
              */
 
-            this.time = (float)((this.time + 8.0) % 24000.0);
+            this.time = (float)((this.time + 2.0) % 24000.0);
             if (this.time >= 0.0 && this.time < 4000.0)
             {
                 this.skyColor = new Color((int)(81.0 + 174.0 * (this.time / 4000.0)), (int)(81.0 + 174.0 * (this.time / 4000.0)), (int)(81.0 + 174.0 * (this.time / 4000.0)));
@@ -494,10 +494,10 @@ namespace DungeonGame.Levels
             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, transformMatrix: new Matrix?(camera.GetTransform()));
             spriteBatch.GraphicsDevice.Clear(Color.Transparent);
 
-            Vector3[] lightPosition = new Vector3[2];
-            Vector4[] lightColour = new Vector4[2];
-            float[] lightIntensity = new float[2];
-            float[] lightRadius = new float[2];
+            Vector3[] lightPosition = new Vector3[32];
+            Vector4[] lightColour = new Vector4[32];
+            float[] lightIntensity = new float[32];
+            float[] lightRadius = new float[32];
             int currentLightIndex = 0;
             
             foreach (Entity entity in this.entityList)
@@ -506,6 +506,7 @@ namespace DungeonGame.Levels
                     entity.Render(spriteBatch);
                 if(entity is ILightSource)
                 {
+                    if (currentLightIndex >= 32) continue;
                     lightPosition[currentLightIndex] = Vector3.Transform(entity.position, this.game.mainCamera.GetLightingTransform());
                     lightColour[currentLightIndex] = ((ILightSource)entity).Color.ToVector4();
                     lightIntensity[currentLightIndex] = ((ILightSource)entity).Intensity;
@@ -515,7 +516,7 @@ namespace DungeonGame.Levels
             }
             spriteBatch.End();
 
-            for (int i = currentLightIndex; i < 2; i++)
+            for (int i = currentLightIndex; i < 32; i++)
             {
                 lightPosition[currentLightIndex] = new Vector3(0,0,0);
                 lightColour[currentLightIndex] = new Vector4(0,0,0,0);
@@ -535,7 +536,7 @@ namespace DungeonGame.Levels
             this.lightingEffect.Parameters["LightColour"].SetValue(lightColour);
             this.lightingEffect.Parameters["LightIntensity"].SetValue(lightIntensity);
             this.lightingEffect.Parameters["LightRadius"].SetValue(lightRadius);
-
+            this.lightingEffect.Parameters["LightCount"].SetValue(currentLightIndex);
             //this.lightingEffect.Parameters["MaskTexture"].SetValue(this.renderTargetDynamicLighting);
 
             spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, effect: this.lightingEffect);

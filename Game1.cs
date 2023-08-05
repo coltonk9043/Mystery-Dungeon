@@ -95,7 +95,7 @@ namespace DungeonGame
             this.currentWorld.addEntity(new EntityBat(new Vector3(35f, 40f, 0.0f)));
             this.player = new ClientPlayer(this.Content.Load<Texture2D>("Textures/player"), new Vector3(20f, 50f, 0.0f));
             this.currentWorld.addPlayer(this.player);
-            this.mainCamera = new Camera(this._graphics, (Entity)this.player);
+            this.mainCamera = new Camera(_graphics, (Entity)this.player);
             this.settings = new Settings();
             this.mouseHelper = new MouseHelper(this);
             this.currentScreen = (Gui)new TitleMenu(null, this.font);
