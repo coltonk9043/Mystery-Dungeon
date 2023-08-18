@@ -5,6 +5,7 @@
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -16,15 +17,15 @@ namespace DungeonGame.UI.Widgets
         public bool mouseOver;
         private Action pressedAction;
 
-        public LabelWidget(Rectangle position, string text, SpriteFont font, Action func)
-          : base(position)
+        public LabelWidget(ContentManager content, Rectangle position, string text, SpriteFont font, Action func)
+          : base(content, position)
         {
             this.text = text;
             this.pressedAction = func;
         }
 
-        public LabelWidget(Rectangle position, string text, SpriteFont font)
-          : base(position)
+        public LabelWidget(ContentManager content, Rectangle position, string text, SpriteFont font)
+          : base(content, position)
         {
             this.text = text;
         }
@@ -47,6 +48,11 @@ namespace DungeonGame.UI.Widgets
             }
             else
                 this.mouseOver = false;
+        }
+
+        public override void Load(ContentManager contentManager)
+        {
+
         }
     }
 }

@@ -4,6 +4,7 @@
 // MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
+using Dungeon;
 using DungeonGame.UI.Widgets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -16,12 +17,12 @@ namespace DungeonGame.UI.Menus
     private ButtonWidget restoreButton;
     private ButtonWidget backButton;
 
-    public SettingsMenu(Gui parent, SpriteFont font)
-      : base(parent, font)
+    public SettingsMenu(GenericGame game, Gui parent, SpriteFont font)
+      : base(game, parent, font)
     {
       this.isIngame = false;
-      this.restoreButton = new ButtonWidget(new Rectangle(Game1.ScreenWidth / 2 - 8 - 192, Game1.ScreenHeight - 128, 192, 64), "Restore Defaults", font, new Action(((Gui) this).returnToParent));
-      this.backButton = new ButtonWidget(new Rectangle(Game1.ScreenWidth / 2 + 8, Game1.ScreenHeight - 128, 192, 64), "Back", font, new Action(((Gui) this).returnToParent));
+      this.restoreButton = new ButtonWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 8 - 192, game.ScreenHeight - 128, 192, 64), "Restore Defaults", font, new Action(((Gui) this).returnToParent));
+      this.backButton = new ButtonWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 + 8, game.ScreenHeight - 128, 192, 64), "Back", font, new Action(((Gui) this).returnToParent));
       this.widgets.Add((Widget) this.restoreButton);
       this.widgets.Add((Widget) this.backButton);
     }

@@ -36,13 +36,13 @@ namespace DungeonGame.Item
             this.register("tungsten_knife", new ItemSword("tungsten_knife", true, 1, 1, new SwordProperties(10, 0.2f, 0.2f)));
             this.register("elesis_claymore", new ItemSword("sword", true, 4, 1, new SwordProperties(10, 0.2f, 0.2f)));
             this.register("diamond", new AbstractItem("diamond", true, 4, 64));
-            this.register("diamond_staff", new AbstractItem("diamond_staff", true, 4, 1));
+            this.register("diamond_staff", new ItemStaff("diamond_staff", true, 4, 1));
             this.register("sapphire", new AbstractItem("sapphire", true, 4, 64));
-            this.register("sapphire_staff", new AbstractItem("sapphire_staff", true, 4, 1));
+            this.register("sapphire_staff", new ItemStaff("sapphire_staff", true, 4, 1));
             this.register("ruby", new AbstractItem("ruby", true, 4, 64));
-            this.register("ruby_staff", new AbstractItem("ruby_staff", true, 4, 1));
+            this.register("ruby_staff", new ItemStaff("ruby_staff", true, 4, 1));
             this.register("emerald", new AbstractItem("emerald", true, 4, 64));
-            this.register("emerald_staff", new AbstractItem("emerald_staff", true, 4, 1));
+            this.register("emerald_staff", new ItemStaff("emerald_staff", true, 4, 1));
         }
 
         private AbstractItem register(string key, AbstractItem itemIn)

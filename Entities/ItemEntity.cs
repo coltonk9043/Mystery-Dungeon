@@ -1,12 +1,13 @@
 ﻿using Dungeon.Entities;
 using DungeonGame.Entities.Player;
+using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
 namespace DungeonGame.Entities
 {
-    internal class ItemEntity : Entity, ILightSource
+    internal class ItemEntity : Entity
     {
         public DungeonGame.Item.AbstractItem item;
         private Random rand;
@@ -14,10 +15,11 @@ namespace DungeonGame.Entities
         private Color _color;
 
 
-        public ItemEntity(Vector3 position, DungeonGame.Item.AbstractItem item)
-          : base(position)
+        public ItemEntity(World world, Vector3 position, DungeonGame.Item.AbstractItem item)
+          : base(world, position)
         {
             this.item = item;
+            this.isKinematic = true;
             this.texture = this.item.getTexture();
             this.boundingBox = new BoundingBox(this.position.X, this.position.Y, (float)this.texture.Width, (float)this.texture.Height);
             this.rand = new Random();
@@ -25,11 +27,7 @@ namespace DungeonGame.Entities
             _color = new Color(rand.Next(0, 255), rand.Next(0, 255), rand.Next(0, 255), 255);
         }
 
-        public Color Color { get => _color; set => throw new NotImplementedException(); }
-        public float Radius { get => 20000.0f; set => throw new NotImplementedException(); }
-        public float Intensity { get => 1.0f; set => throw new NotImplementedException(); }
-
-        public override void handleCollision(Entity entity)
+        public override void HandleCollision(Entity entity)
         {
             if (entity != Game1.getInstance().player)
                 return;
@@ -37,7 +35,7 @@ namespace DungeonGame.Entities
             this.removed = true;
         }
 
-        public override void onMouseClicked()
+        public override void OnMouseClicked()
         {
         }
 

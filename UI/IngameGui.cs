@@ -4,6 +4,7 @@
 // MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
+using Dungeon;
 using Dungeon.UI;
 using DungeonGame.Entities.Player;
 using DungeonGame.Item;
@@ -36,31 +37,31 @@ namespace DungeonGame.UI
         private Texture2D inventoryHotbar;
         private Texture2D hotbarSelected;
 
-        public IngameGui(Gui parent, SpriteFont font, ClientPlayer player, FrameCounter frameCounter)
-          : base(parent, font)
+        public IngameGui(GenericGame game, Gui parent, SpriteFont font, ClientPlayer player)
+          : base(game, parent, font)
         {
             this.player = player;
             this.frameCounter = frameCounter;
 
-            this.HPBackgroundL = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/HPBackground_L");
-            this.StaminaBackgroundL = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/EnergyBackground_L");
-            this.ManaBackgroundL = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/ManaBackground_L");
+            this.HPBackgroundL = game.GetContentManager().Load<Texture2D>("Textures/GUI/HPBackground_L");
+            this.StaminaBackgroundL = game.GetContentManager().Load<Texture2D>("Textures/GUI/EnergyBackground_L");
+            this.ManaBackgroundL = game.GetContentManager().Load<Texture2D>("Textures/GUI/ManaBackground_L");
  
-            this.BarBackgroundMid = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/BarBackground_MID");
-            this.BarSmallBackgroundMid = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/BarSmallBackground_MID");
+            this.BarBackgroundMid = game.GetContentManager().Load<Texture2D>("Textures/GUI/BarBackground_MID");
+            this.BarSmallBackgroundMid = game.GetContentManager().Load<Texture2D>("Textures/GUI/BarSmallBackground_MID");
             
-            this.BarBackgroundR = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/BarBackground_R");
-            this.BarSmallBackgroundR = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/BarSmallBackground_R");
+            this.BarBackgroundR = game.GetContentManager().Load<Texture2D>("Textures/GUI/BarBackground_R");
+            this.BarSmallBackgroundR = game.GetContentManager().Load<Texture2D>("Textures/GUI/BarSmallBackground_R");
 
-            this.inventoryHotbar = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/inventoryHotbar");
-            this.hotbarSelected = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/hotbar_select");
+            this.inventoryHotbar = game.GetContentManager().Load<Texture2D>("Textures/GUI/inventoryHotbar");
+            this.hotbarSelected = game.GetContentManager().Load<Texture2D>("Textures/GUI/hotbar_select");
             this.hpRect = new Texture2D(Game1.getInstance().GraphicsDevice, 1, 1);
             this.hpRect.SetData<Color>(new Color[1]
             {
         new Color((int) byte.MaxValue, (int) byte.MaxValue, (int) byte.MaxValue, (int) byte.MaxValue)
             });
 
-            this.chatGui = new ChatBoxGui(this, font);
+            this.chatGui = new ChatBoxGui(game, this, font);
         }
 
         public override void Draw(SpriteBatch spriteBatch, SpriteFont font)
@@ -85,7 +86,7 @@ namespace DungeonGame.UI
                 spriteBatch.Draw(this.BarSmallBackgroundR, new Vector2((float)(36 + this.manaLength * 4), 68f), new Rectangle?(new Rectangle(0, 0, 2, 4)), Color.White, 0.0f, Vector2.Zero, new Vector2(4f, 4f), SpriteEffects.None, 0.0f);
 
 
-                Vector2 position = new Vector2((float)(Game1.ScreenWidth / 2 - this.inventoryHotbar.Width * 2), (float)(Game1.ScreenHeight - 100));
+                Vector2 position = new Vector2((float)(game.ScreenWidth / 2 - this.inventoryHotbar.Width * 2), (float)(game.ScreenHeight - 100));
                 spriteBatch.Draw(this.inventoryHotbar, position, new Rectangle?(new Rectangle(0, 0, this.inventoryHotbar.Width, this.inventoryHotbar.Height)), Color.White, 0.0f, Vector2.Zero, new Vector2(4f, 4f), SpriteEffects.None, 0.0f);
                 spriteBatch.Draw(this.hotbarSelected, position + new Vector2((float)(this.player.currentHotbar * 72), 0.0f), new Rectangle?(new Rectangle(0, 0, this.hotbarSelected.Width, this.hotbarSelected.Height)), Color.White, 0.0f, Vector2.Zero, new Vector2(4f, 4f), SpriteEffects.None, 0.0f);
                 
@@ -117,6 +118,8 @@ namespace DungeonGame.UI
             this.hpLength = (int)(this.player.MaxHP / 2.0);
             this.staminaLength = (int)(this.player.Stamina / 2.0);
             this.manaLength = (int)(this.player.Mana / 2.0);
+
+            chatGui.Update(gameTime, mouseHelper);
         }
 
         public void ToggleDebug() => this.debugEnabled = !this.debugEnabled;

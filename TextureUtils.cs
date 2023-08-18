@@ -16,7 +16,7 @@ namespace DungeonGame
         /// <returns></returns>
         public static Texture2D[] createTextureArrayFromFile(string fileName, int sizeX, int sizeY)
         {
-            Texture2D texture2D1 = Game1.getInstance().contentManager.Load<Texture2D>(fileName);
+            Texture2D texture2D1 = Game1.getInstance().GetContentManager().Load<Texture2D>(fileName);
             int num1 = texture2D1.Width / sizeX;
             int num2 = texture2D1.Height / sizeY;
             Texture2D[] texture2DArray = new Texture2D[num1 * num2];
@@ -52,7 +52,7 @@ namespace DungeonGame
         /// <returns></returns>
         public static Texture2D[,] create2DTextureArrayFromFile(string fileName, int sizeX, int sizeY)
         {
-            Texture2D texture2D1 = Game1.getInstance().contentManager.Load<Texture2D>(fileName);
+            Texture2D texture2D1 = Game1.getInstance().GetContentManager().Load<Texture2D>(fileName);
             int length1 = texture2D1.Width / sizeX;
             int length2 = texture2D1.Height / sizeY;
             Texture2D[,] texture2DArray = new Texture2D[length1, length2];

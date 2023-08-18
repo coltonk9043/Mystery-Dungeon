@@ -1,5 +1,6 @@
 ﻿// Colton K
 // A class that handles most of the mouse logic ingame.
+using Dungeon;
 using DungeonGame.Entities;
 using DungeonGame.Entities.NPCs;
 using DungeonGame.Entities.Player;
@@ -13,7 +14,7 @@ namespace DungeonGame
     public class MouseHelper
     {
         // Variables
-        private Game1 game;
+        private GenericGame game;
         private Texture2D currentMouseCursor;
         private Texture2D defaultMouseCursor;
         private Texture2D dialogueMouseCursor;
@@ -25,20 +26,21 @@ namespace DungeonGame
         private bool leftClicked;
         private bool rightPreviouslyClicked;
         private bool rightClicked;
-        private float previousScrollValue;
-        private float currentMouseWheelValue;
-        private float scrollOffset = 0.0f;
+
+        private int previousScrollValue;
+        private int currentMouseWheelValue;
+        private int scrollOffset = 0;
 
 
         /// <summary>
         /// Constructor for the mouse helper.
         /// </summary>
         /// <param name="game"></param>
-        public MouseHelper(Game1 game)
+        public MouseHelper(GenericGame game)
         {
             this.game = game;
-            this.defaultMouseCursor = this.game.contentManager.Load<Texture2D>("Textures/Gui/cursor");
-            this.dialogueMouseCursor = this.game.contentManager.Load<Texture2D>("Textures/GUI/cursorDialogue");
+            this.defaultMouseCursor = this.game.GetContentManager().Load<Texture2D>("Textures/Gui/cursor");
+            this.dialogueMouseCursor = this.game.GetContentManager().Load<Texture2D>("Textures/GUI/cursorDialogue");
             this.currentMouseCursor = this.defaultMouseCursor;
         }
 
@@ -48,21 +50,21 @@ namespace DungeonGame
         public void Update()
         {
             // Gets the position of the mouse relative to worldspace.
-            Vector2 positionRelativeToWorld = this.game.mainCamera.getMousePositionRelativeToWorld();
+            Vector2 positionRelativeToWorld = this.game.GetCamera().getMousePositionRelativeToWorld(this);
             this.mouseCollision.X = positionRelativeToWorld.X;
             this.mouseCollision.Y = positionRelativeToWorld.Y + 12f;
-            if (this.game.getCurrentScreen() == null)
+            if (this.game.GetWorld() == null)
             {
                 // For every entity on screen, check if the mouse is over top of an entity..
                 Entity entity1 = (Entity)null;
-                foreach (Entity entity2 in this.game.currentWorld.getEntities())
+                foreach (Entity entity2 in this.game.GetWorld().getEntities())
                 {
                     // if the player is not a player, and it intersects, 
                     if (!(entity2 is ClientPlayer) && this.mouseCollision.Intersection(entity2.GetBoundingBox()) != null && entity2 is NPC)
                     {
                         entity1 = entity2;
                         this.currentMouseCursor = this.dialogueMouseCursor;
-                        this.playerInRange = (double)entity2.distanceFromEntity((Entity)this.game.player) <= 24.0;
+                        this.playerInRange = (double)entity2.DistanceFromEntity((Entity)this.game.GetPlayer()) <= 24.0;
                         break;
                     }
                 }
@@ -70,21 +72,20 @@ namespace DungeonGame
                 if (entity1 == null)
                     this.currentMouseCursor = this.defaultMouseCursor;
                 else if (this.getRightClicked() && this.playerInRange)
-                    entity1.onMouseClicked();
+                    entity1.OnMouseClicked();
             }
             else
             {
                 this.currentMouseCursor = this.defaultMouseCursor;
             }
 
-            // Determines if the mouse wheel is used.
-            if ((double)this.scrollOffset != 0.0) { 
-                this.scrollOffset = 0.0f;
-                this.currentMouseWheelValue = (float) Mouse.GetState().ScrollWheelValue;
-            }
-
             // Checks if the mouse wheel is used, if so, calculate the offset.
-            if ((double)this.currentMouseWheelValue != (double)this.previousScrollValue)
+            this.currentMouseWheelValue = Mouse.GetState().ScrollWheelValue;
+            if (this.currentMouseWheelValue == this.previousScrollValue)
+            {
+                this.scrollOffset = 0;
+            }
+            else if (this.currentMouseWheelValue != this.previousScrollValue)
             {
                 this.scrollOffset = this.currentMouseWheelValue - this.previousScrollValue;
                 this.previousScrollValue = this.currentMouseWheelValue;

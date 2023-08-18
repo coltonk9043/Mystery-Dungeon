@@ -4,6 +4,7 @@
 // MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
+using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -24,8 +25,8 @@ namespace DungeonGame.Entities.Player
         public float Mana { get { return mana; } set { mana = value; } }
         public float Stamina { get { return stamina; } set { stamina = value; } }
 
-        public AbstractPlayer(Texture2D texture, Vector3 position)
-          : base(position)
+        public AbstractPlayer(World world, Texture2D texture, Vector3 position)
+          : base(world, position)
         {
             this.texture = texture;
             Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile("Textures/player_spritesheet", 16, 24);
@@ -84,7 +85,7 @@ namespace DungeonGame.Entities.Player
                 base.Render(spriteBatch);
         }
 
-        public override void handleCollision(Entity entity)
+        public override void HandleCollision(Entity entity)
         {
         }
 

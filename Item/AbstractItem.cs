@@ -20,7 +20,7 @@ namespace DungeonGame.Item
 
         public AbstractItem(string texture, bool usable, int rarity, int maxStackSize)
         {
-            this.texture = Game1.getInstance().contentManager.Load<Texture2D>("Textures/Items/" + texture);
+            this.texture = Game1.getInstance().GetContentManager().Load<Texture2D>("Textures/Items/" + texture);
             this.usable = usable;
             this.rarity = rarity;
             this.maxStackSize = maxStackSize;

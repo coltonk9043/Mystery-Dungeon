@@ -4,6 +4,7 @@
 // MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
+using Dungeon;
 using DungeonGame.UI.Widgets;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -13,13 +14,13 @@ namespace DungeonGame.UI.Menus
 {
   internal class PauseMenu : Gui
   {
-    private ButtonWidget returnToGame;
-    private ButtonWidget settings;
-    private ButtonWidget returnToMainMenu;
-    private Texture2D overlay;
+    private readonly ButtonWidget returnToGame;
+    private readonly ButtonWidget settings;
+    private readonly ButtonWidget returnToMainMenu;
+    private readonly Texture2D overlay;
 
-    public PauseMenu(Gui parent, SpriteFont font)
-      : base(parent, font)
+    public PauseMenu(GenericGame game, Gui parent, SpriteFont font)
+      : base(game, parent, font)
     {
       this.overlay = new Texture2D(Game1.getInstance().GraphicsDevice, 1, 1);
       this.overlay.SetData<Color>(new Color[1]
@@ -27,12 +28,12 @@ namespace DungeonGame.UI.Menus
         new Color(50, 50, 50, 50)
       });
       this.isIngame = true;
-      this.returnToGame = new ButtonWidget(new Rectangle(Game1.ScreenWidth / 2 - 86, Game1.ScreenHeight / 2 - 128, 192, 64), "Return To Game", font, new Action(((Gui) this).returnToParent));
-      this.settings = new ButtonWidget(new Rectangle(Game1.ScreenWidth / 2 - 86, Game1.ScreenHeight / 2 - 48, 192, 64), "Settings", font, new Action(this.openSettings));
-      this.returnToMainMenu = new ButtonWidget(new Rectangle(Game1.ScreenWidth / 2 - 86, Game1.ScreenHeight / 2 + 32, 192, 64), "Exit Game", font, new Action(this.exitGame));
-      this.widgets.Add((Widget) this.returnToGame);
-      this.widgets.Add((Widget) this.settings);
-      this.widgets.Add((Widget) this.returnToMainMenu);
+      this.returnToGame = new ButtonWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 86, game.ScreenHeight / 2 - 128, 192, 64), "Return To Game", font, new Action(((Gui) this).returnToParent));
+      this.settings = new ButtonWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 86, game.ScreenHeight / 2 - 48, 192, 64), "Settings", font, new Action(this.OpenSettings));
+      this.returnToMainMenu = new ButtonWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 86, game.ScreenHeight / 2 + 32, 192, 64), "Exit Game", font, new Action(this.ExitGame));
+      this.widgets.Add(this.returnToGame);
+      this.widgets.Add(this.settings);
+      this.widgets.Add(this.returnToMainMenu);
     }
 
     public override void Update(GameTime gameTime, MouseHelper mouseHelper)
@@ -43,13 +44,13 @@ namespace DungeonGame.UI.Menus
 
     public override void Draw(SpriteBatch spriteBatch, SpriteFont font)
     {
-      spriteBatch.Draw(this.overlay, new Rectangle(0, 0, Game1.ScreenWidth, Game1.ScreenHeight), Color.Black);
+      spriteBatch.Draw(this.overlay, new Rectangle(0, 0, game.ScreenWidth, game.ScreenHeight), Color.Black);
       foreach (Widget widget in this.widgets)
         widget.Draw(spriteBatch, font);
     }
 
-    public void openSettings() => Game1.getInstance().setCurrentScreen((Gui) new SettingsMenu((Gui) this, this.font));
+    public void OpenSettings() => Game1.getInstance().setCurrentScreen(new SettingsMenu(game, this, this.font));
 
-    public void exitGame() => Game1.getInstance().setCurrentScreen((Gui) new TitleMenu((Gui) null, this.font));
+    public void ExitGame() => Game1.getInstance().setCurrentScreen(new TitleMenu(game, null, this.font));
   }
 }

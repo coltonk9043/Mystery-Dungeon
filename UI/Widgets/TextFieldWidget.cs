@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System.Collections.Generic;
@@ -12,8 +13,8 @@ namespace DungeonGame.UI.Widgets
         private string text;
         private List<Keys> previousKeysPressed;
 
-        public TextFieldWidget(Rectangle position)
-          : base(position, Game1.getInstance().contentManager.Load<Texture2D>("Textures/slider_background"))
+        public TextFieldWidget(ContentManager content, Rectangle position)
+          : base(content, position)
         {
             this.text = "";
             this.previousKeysPressed = new List<Keys>();
@@ -23,6 +24,11 @@ namespace DungeonGame.UI.Widgets
         {
             spriteBatch.Draw(this.texture, this.position, Color.White);
             spriteBatch.DrawString(font, this.text, new Vector2((float)(this.position.X + 16), (float)(this.position.Y + this.position.Height / 2 - 8)), Color.White);
+        }
+
+        public override void Load(ContentManager contentManager)
+        {
+            this.texture = contentManager.Load<Texture2D>("Textures/slider_background");
         }
 
         public override void Update(GameTime gameTime, MouseHelper mouseHelper)

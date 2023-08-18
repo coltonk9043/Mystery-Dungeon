@@ -60,7 +60,7 @@ float4 MainPS(VertexShaderOutput input) : COLOR
         float4 lightColor;
 		
 		// Determine the diffuse color amount of each light.
-        lightColor = (LightColour[i] * LightIntensity[i]) * max(0, (1 - lightDistance / LightRadius[i]));
+        lightColor = (LightColour[i] * LightIntensity[i]) * max(0, (1 - lightDistance / (LightRadius[i] * 64)));
         resultingColor += lightColor;
     }
 

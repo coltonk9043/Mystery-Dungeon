@@ -11,6 +11,7 @@ namespace Dungeon.Item
     public class PlaceableItem : AbstractItem
     {
         Entity entityType;
+
         public PlaceableItem(string texture, bool usable, int rarity, int maxStackSize) : base(texture, usable, rarity, maxStackSize)
         {
             
@@ -20,7 +21,8 @@ namespace Dungeon.Item
         {
             if (!(user is AbstractPlayer))
                 return;
-            Vector2 mousePosRelativeToWorld = Game1.getInstance().mainCamera.getMousePositionRelativeToWorld();
+            Vector2 mousePosRelativeToWorld = Game1.getInstance().GetCamera().getMousePositionRelativeToWorld(Game1.getInstance().GetMouseHelper());
+
         }
     }
 }

@@ -1,9 +1,4 @@
-﻿// Decompiled with JetBrains decompiler
-// Type: DungeonGame.UI.DialogueBox
-// Assembly: DungeonGame, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-// MVID: E78E8B53-5180-47B9-9458-06A9AF653F10
-// Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
-
+﻿using Dungeon;
 using DungeonGame.Entities.NPCs;
 using DungeonGame.UI.Widgets;
 using Microsoft.Xna.Framework;
@@ -11,6 +6,7 @@ using Microsoft.Xna.Framework.Audio;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
+using System.Collections.Generic;
 
 namespace DungeonGame.UI
 {
@@ -25,24 +21,36 @@ namespace DungeonGame.UI
         private float currentTime;
         private int currentChar;
         private bool isFinished = false;
-        private LabelWidget response1Text;
-        private LabelWidget response2Text;
 
-        public DialogueBoxGui(Gui parent, SpriteFont font, NPC npc)
-          : base(parent, font)
+        private readonly List<LabelWidget> responseLabels;
+
+        public DialogueBoxGui(GenericGame game, Gui parent, SpriteFont font, NPC npc)
+          : base(game, parent, font)
         {
-            this.texture = Game1.getInstance().contentManager.Load<Texture2D>("Textures/GUI/dialogueBox");
-            this.effect = Game1.getInstance().contentManager.Load<SoundEffect>("Sounds/dialogue");
-            this.currentDialogue = npc.currentDialogues;
-            if (this.currentDialogue.hasResponses)
-            {
-                this.response1Text = new LabelWidget(new Rectangle(Game1.ScreenWidth / 2 - 236, Game1.ScreenHeight - 128, 320, 16), this.currentDialogue.response1.text, font, new Action(this.goToFirstResponse));
-                this.response2Text = new LabelWidget(new Rectangle(Game1.ScreenWidth / 2 - 236, Game1.ScreenHeight - 106, 320, 16), this.currentDialogue.response2.text, font, new Action(this.goToSecondResponse));
-            }
+            this.texture = game.GetContentManager().Load<Texture2D>("Textures/GUI/dialogueBox");
+            this.effect = game.GetContentManager().Load<SoundEffect>("Sounds/dialogue");
+
+            this.responseLabels = new List<LabelWidget>();
+            this.LoadDialogue(npc.currentDialogues);
+
             this.speaker = npc;
             this.currentChar = 0;
             this.chars = "";
             this.isIngame = true;
+        }
+
+        private void LoadDialogue(Dialogue dialogue)
+        {
+            this.isFinished = false;
+
+            this.currentDialogue = dialogue;
+            int offset = 128;
+            this.responseLabels.Clear();
+            foreach (DialogueResponse response in dialogue.responses)
+            {
+                this.responseLabels.Add(new LabelWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 236, game.ScreenHeight - offset, 320, 16), response.text, font, new Action(() => this.HandleResponse(response))));
+                offset += 16;
+            }
         }
 
         private string parseText(string text)
@@ -65,27 +73,23 @@ namespace DungeonGame.UI
         {
             if (this.isFinished)
             {
-                if (this.currentDialogue.hasResponses)
+                for (int i = 0; i < responseLabels.Count; i++)
                 {
-                    this.response1Text.Update(gameTime, mouseHelper);
-                    this.response2Text.Update(gameTime, mouseHelper);
+                    if (i >= responseLabels.Count) break;
+
+                    LabelWidget responseLabel = responseLabels[i];
+                    if(responseLabel != null)
+                    {
+                        responseLabel.Update(gameTime, mouseHelper);
+                    }
                 }
-                else if (mouseHelper.getLeftClicked())
+
+                if (mouseHelper.getLeftDown() && this.currentDialogue.responses.Count == 0)
                 {
-                    if (this.currentDialogue.nextDialogue == null)
-                    {
-                        this.returnToParent();
-                    }
-                    else
-                    {
-                        this.currentChar = 0;
-                        this.chars = "";
-                        this.currentDialogue = this.currentDialogue.nextDialogue;
-                        this.isFinished = false;
-                    }
+                    Game1.getInstance().setCurrentScreen(null);
                 }
             }
-            else if (this.currentChar == this.currentDialogue.text.Length)
+            else if (this.currentChar >= this.currentDialogue.text.Length)
             {
                 this.isFinished = true;
             }
@@ -105,27 +109,22 @@ namespace DungeonGame.UI
 
         public override void Draw(SpriteBatch spriteBatch, SpriteFont font)
         {
-            spriteBatch.Draw(this.texture, new Rectangle(Game1.ScreenWidth / 2 - 256, Game1.ScreenHeight - 192, 512, 128), Color.White);
+            spriteBatch.Draw(this.texture, new Rectangle(game.ScreenWidth / 2 - 256, game.ScreenHeight - 192, 512, 128), Color.White);
             if (this.speaker != null)
-                spriteBatch.Draw(this.speaker.portrait, new Rectangle(Game1.ScreenWidth / 2 + 128, Game1.ScreenHeight - 176, 96, 96), Color.White);
-            spriteBatch.DrawString(this.font, this.parseText(this.chars), new Vector2((float)(Game1.ScreenWidth / 2 - 236), (float)(Game1.ScreenHeight - 176)), Color.White);
-            if (!this.isFinished || !this.currentDialogue.hasResponses)
+                spriteBatch.Draw(this.speaker.portrait, new Rectangle(game.ScreenWidth / 2 + 128, game.ScreenHeight - 176, 96, 96), Color.White);
+            spriteBatch.DrawString(this.font, this.parseText(this.chars), new Vector2((game.ScreenWidth / 2 - 236), (game.ScreenHeight - 176)), Color.White);
+            if (!this.isFinished)
                 return;
-            this.response1Text.Draw(spriteBatch, font);
-            this.response2Text.Draw(spriteBatch, font);
+
+            foreach (LabelWidget label in responseLabels)
+            {
+                label.Draw(spriteBatch, font);
+            }
         }
 
-        public void goToFirstResponse()
+        public void HandleResponse(DialogueResponse response)
         {
-            this.currentDialogue = this.currentDialogue.response1.NPCResponse;
-            this.currentChar = 0;
-            this.chars = "";
-            this.isFinished = false;
-        }
-
-        public void goToSecondResponse()
-        {
-            this.currentDialogue = this.currentDialogue.response2.NPCResponse;
+            LoadDialogue(response.NPCResponse);
             this.currentChar = 0;
             this.chars = "";
             this.isFinished = false;

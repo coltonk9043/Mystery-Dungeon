@@ -7,19 +7,30 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using static DungeonGame.Levels.World;
 
 namespace DungeonGame.Entities
 {
     public abstract class Entity
     {
+        /**
+         * Physics Variables
+         */
         public Vector3 position;
         public Vector3 velocity;
         public Vector3 acceleration;
-        public Queue<Vector2> path;
+        public bool isKinematic = false;
         public Direction facing;
+
+        public Entity Parent { get; set; }
+        public List<Entity> Children { get; set; }
+
+        protected World world;
+        public World GetWorld() { return world; }
+
+        public Queue<Vector2> path;
+
         public bool removed;
+
         protected Texture2D texture;
         protected Texture2D entityShadow;
         protected Animation currentAnimation;
@@ -39,12 +50,19 @@ namespace DungeonGame.Entities
         /// Abstract Constructor for a basic entity.
         /// </summary>
         /// <param name="position"></param>
-        public Entity(Vector3 position)
+        public Entity(World world, Vector3 position)
         {
+            this.world = world;
             this.position = position;
             this.velocity = new Vector3();
             this.acceleration = new Vector3();
             this.entityShadow = Game1.getInstance().Content.Load<Texture2D>("Textures/entity_shadow");
+        }
+
+        public void AddChild(Entity child)
+        {
+            child.Parent = this;
+            Children.Add(child);
         }
 
         /// <summary>
@@ -60,25 +78,34 @@ namespace DungeonGame.Entities
                 this.currentAnimation.Update(gameTime);
                 this.texture = this.currentAnimation.getCurrentTexture();
             }
+
+            if (!this.isKinematic)
+                this.acceleration.Z = -9.81f;
+
             // Runs an update method.
             this.UpdateEntity(gameTime);
+
+            this.velocity += acceleration * (gameTime.ElapsedGameTime.Milliseconds / 1000.0f);
 
             // Precalculates the next position that the player would be.
             float nextPosX = this.position.X + this.velocity.X;
             float nextPosY = this.position.Y + this.velocity.Y;
 
             // Creates a new bounding box to check whether or not the next position is inside of a collidable tile/entity.
-            if(this.boundingBox != null)
+            if (this.boundingBox != null)
             {
                 BoundingBox bb = new BoundingBox(nextPosX - (this.boundingBox.Width / 2f), nextPosY - this.boundingBox.Height, boundingBox.Width, boundingBox.Height);
-                this.checkWorldCollision(bb, world, nextPosX, nextPosY);
-                this.checkEntityCollisions(bb);
+                this.CheckWorldCollision(bb, world, nextPosX, nextPosY);
+                this.CheckEntityCollisions(bb);
             }
 
             
             // Update player's position and bounding box accordingly.
             this.position.X += this.velocity.X;
             this.position.Y += this.velocity.Y;
+            this.position.Z += this.velocity.Z;
+
+            this.position.Z = MathF.Max(0, this.position.Z);
             if (this.boundingBox != null)
             {
                 this.boundingBox.X = this.position.X - this.boundingBox.Width / 2f;
@@ -88,7 +115,7 @@ namespace DungeonGame.Entities
 
         public abstract void Render(SpriteBatch spriteBatch);
 
-        public abstract void onMouseClicked();
+        public abstract void OnMouseClicked();
 
         public virtual void RenderEntityShadow(SpriteBatch spriteBatch)
         {
@@ -96,7 +123,7 @@ namespace DungeonGame.Entities
             spriteBatch.Draw(this.entityShadow, new Vector2(this.position.X - (float)(this.entityShadow.Width / 2), this.position.Y - (float)(this.entityShadow.Height / 2)), new Rectangle?(new Rectangle(0, 0, this.entityShadow.Width, this.entityShadow.Height)), Color.White, 0.0f, Vector2.Zero, 1f, SpriteEffects.None, 0.0f);
         }
 
-        public void checkWorldCollision(BoundingBox currentBoundingBox, Levels.World world, float posX, float posY)
+        public void CheckWorldCollision(BoundingBox currentBoundingBox, Levels.World world, float posX, float posY)
         {
             Vector2 entityPosAsTilePos = this.GetPositionAsTilePos(posX, posY);
             BoundingBox boundingBox1 = new BoundingBox(currentBoundingBox.X, this.boundingBox.Y, this.boundingBox.Width, this.boundingBox.Height);
@@ -130,18 +157,18 @@ namespace DungeonGame.Entities
             }
         }
 
-        public void checkEntityCollisions(BoundingBox currentBoundingBox)
+        public void CheckEntityCollisions(BoundingBox currentBoundingBox)
         {
             BoundingBox boundingBox1 = new BoundingBox(currentBoundingBox.X, this.boundingBox.Y, this.boundingBox.Width, this.boundingBox.Height);
             BoundingBox boundingBox2 = new BoundingBox(this.boundingBox.X, currentBoundingBox.Y, this.boundingBox.Width, this.boundingBox.Height);
-            foreach (Entity entity in Game1.getInstance().currentWorld.getEntities())
+            foreach (Entity entity in world.getEntities())
             {
                 if (this != entity)
                 {
                     if (entity is LivingEntity || entity is ItemEntity || entity is Projectile)
                     {
                         if (this.boundingBox.Intersection(entity.boundingBox) != null)
-                            this.handleCollision(entity);
+                            this.HandleCollision(entity);
                     }
                     else
                     {
@@ -157,18 +184,18 @@ namespace DungeonGame.Entities
             }
         }
 
-        public abstract void handleCollision(Entity entity);
+        public abstract void HandleCollision(Entity entity);
 
         public abstract void UpdateEntity(GameTime gameTime);
 
-        public float distanceFromEntity(Entity entity)
+        public float DistanceFromEntity(Entity entity)
         {
             float num1 = this.position.X - entity.position.X;
             float num2 = this.position.Y - entity.position.Y;
             return (float)Math.Sqrt((double)num1 * (double)num1 + (double)num2 * (double)num2);
         }
 
-        public float euclidianDistanceFromEntity(Entity entity)
+        public float EuclidianDistanceFromEntity(Entity entity)
         {
             float num1 = this.position.X - entity.position.X;
             float num2 = this.position.Y - entity.position.Y;
@@ -178,7 +205,11 @@ namespace DungeonGame.Entities
         public Vector2 GetEntityPosAsTilePos() => new Vector2((float)(int)(this.position.X / 16.0), (float)(int)(this.position.Y / 16.0));
         public Vector2 GetPositionAsTilePos(float x, float y) => new Vector2((float)(int)(x / 16.0), (float)(int)(y / 16.0));
 
-        public void setAnimation(Animation animation)
+        /// <summary>
+        /// Sets the current Animation.
+        /// </summary>
+        /// <param name="animation"></param>
+        public void SetAnimation(Animation animation)
         {
             if (this.currentAnimation == animation)
                 return;
@@ -187,8 +218,16 @@ namespace DungeonGame.Entities
             this.currentAnimation.Start();
         }
 
+        /// <summary>
+        /// Returns the current Texture2D used by the Entity.
+        /// </summary>
+        /// <returns>Textures currently being used by this Entity as a Texture2D.</returns>
         public Texture2D GetTexture() { return this.texture; }
 
+        /// <summary>
+        /// Returns the BoundingBox currently used by the Entity.
+        /// </summary>
+        /// <returns></returns>
         public BoundingBox GetBoundingBox() { return this.boundingBox; }
 
         public void playAnimationOnce()

@@ -1,6 +1,7 @@
 ﻿using DungeonGame;
 using DungeonGame.UI.Widgets;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
@@ -16,9 +17,14 @@ namespace Dungeon.UI.Widgets.Lists
         private T selected;
         private T hovered;
 
-        public AbstractSelectionList(Rectangle position) : base(position)
+        public AbstractSelectionList(ContentManager content, Rectangle position) : base(content, position)
         {
             this.children = new List<T>();
+        }
+
+        public override void Load(ContentManager contentManager)
+        {
+            throw new NotImplementedException();
         }
 
         public override void Update(GameTime gameTime, MouseHelper mouseHelper)

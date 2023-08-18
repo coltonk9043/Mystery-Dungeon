@@ -7,19 +7,25 @@ namespace Dungeon.Entities
 {
     interface ILightSource
     {
-        Color Color
+        Color LightColor
         {
             get;
             set;
         }
 
-        float Radius
+        float LightRadius
         {
             get;
             set;
         }
 
-        float Intensity
+        float LightIntensity
+        {
+            get;
+            set;
+        }
+
+        bool LightOn
         {
             get;
             set;

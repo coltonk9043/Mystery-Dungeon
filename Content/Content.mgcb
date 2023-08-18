@@ -932,6 +932,18 @@
 /processorParam:TextureFormat=Color
 /build:Textures/Items/tungsten_sword.png
 
+#begin Textures/lamppost.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/lamppost.png
+
 #begin Textures/Lighting/Torch.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -991,18 +1003,6 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:Textures/player_spritesheet.png
-
-#begin Textures/pokemon_spritesheet.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:Textures/pokemon_spritesheet.png
 
 #begin Textures/slider_background.png
 /importer:TextureImporter

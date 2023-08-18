@@ -1,30 +1,33 @@
-﻿using Dungeon.Entities;
+﻿using Dungeon;
+using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using System;
-using static DungeonGame.Levels.World;
 
 namespace DungeonGame.Entities.Player
 {
     public class ClientPlayer : AbstractPlayer
     {
+        private GenericGame game;
         public int currentHotbar = 0;
 
-        public ClientPlayer(Texture2D texture, Vector3 position)
-          : base(texture, position)
+        public ClientPlayer(GenericGame game, World world, Texture2D texture, Vector3 position)
+          : base(world, texture, position)
         {
-            this.boundingBox = new DungeonGame.Entities.BoundingBox(this.position.X, this.position.Y, 12f, 4f);
+            this.game = game;
+            this.boundingBox = new BoundingBox(this.position.X, this.position.Y, 12f, 4f);
         }
 
         public override void MovePlayer(GameTime gameTime)
         {
-            
-            this.velocity = new Vector3(0.0f, 0.0f, 0.0f);
-            if (this.showingItem)
-                return;
+            // Reset Velocity
+            this.velocity = new Vector3(0.0f, 0.0f, this.velocity.Z);
+
+            // If the player is not in a swinging animation.
             if (this.currentAnimation != this.SwordSwingSouth)
             {
+                // Change the currently selected Hot Bar index when the user presses a numeric number.
                 if (Keyboard.GetState().IsKeyDown(Keys.D1))
                     this.currentHotbar = 0;
                 if (Keyboard.GetState().IsKeyDown(Keys.D2))
@@ -45,23 +48,31 @@ namespace DungeonGame.Entities.Player
                     this.currentHotbar = 8;
                 if (Keyboard.GetState().IsKeyDown(Keys.D0))
                     this.currentHotbar = 9;
-                if ((double)Game1.getInstance().mouseHelper.getScrollOffset() < 0.0)
+
+                if (Keyboard.GetState().IsKeyDown(Keys.Space))
+                {
+                    jump();
+                }
+
+                if (game.GetMouseHelper().getScrollOffset() < 0.0f)
                 {
                     if (this.currentHotbar - 1 < 0)
                         this.currentHotbar = 9;
                     else
                         --this.currentHotbar;
                 }
-                else if ((double)Game1.getInstance().mouseHelper.getScrollOffset() > 0.0)
+                else if (game.GetMouseHelper().getScrollOffset() > 0.0f)
                     this.currentHotbar = (this.currentHotbar + 1) % 9;
+
+
                 this.CurrentItem = this.inventory.getHotbar()[this.currentHotbar];
                 GamePadState state = GamePad.GetState(PlayerIndex.One);
                 if (state.IsConnected)
                 {
-                    double x = (double)GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X;
-                    double y = (double)GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.Y;
-                    this.velocity.X = (float)(this.MovementSpeed * x);
-                    this.velocity.Y = (float)-(this.MovementSpeed * y);
+                    float x = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.X;
+                    float y = GamePad.GetState(PlayerIndex.One).ThumbSticks.Left.Y;
+                    this.velocity.X = (this.MovementSpeed * x);
+                    this.velocity.Y = -(this.MovementSpeed * y);
                 }
                 else
                 {
@@ -69,56 +80,82 @@ namespace DungeonGame.Entities.Player
                     Game1 instance = Game1.getInstance();
                     if (Game1.getInstance().getCurrentScreen() != null)
                         return;
-                    if (Keyboard.GetState().IsKeyDown(instance.settings.bindLeft))
-                    {
-                        this.setAnimation(this.WestFacingAnim);
-                        this.velocity.X = -this.MovementSpeed;
-                        flag = true;
-                    }
-                    if (Keyboard.GetState().IsKeyDown(instance.settings.bindRight))
-                    {
-                        this.setAnimation(this.EastFacingAnim);
-                        this.velocity.X = this.MovementSpeed;
-                        flag = true;
-                    }
+
                     if (Keyboard.GetState().IsKeyDown(instance.settings.bindForward))
                     {
-                        this.setAnimation(this.NorthFacingAnim);
+                        if (!flag)
+                        {
+                            this.SetAnimation(this.NorthFacingAnim);
+                            flag = true;
+                        }
                         this.velocity.Y = -this.MovementSpeed;
-                        flag = true;
                     }
                     if (Keyboard.GetState().IsKeyDown(instance.settings.bindBackwards))
                     {
-                        this.setAnimation(this.SouthFacingAnim);
+                        if (!flag)
+                        {
+                            this.SetAnimation(this.SouthFacingAnim);
+                            flag = true;
+                        }
                         this.velocity.Y = this.MovementSpeed;
-                        flag = true;
                     }
-                    if (Keyboard.GetState().IsKeyDown(Keys.Space) && (double)this.position.Z == 0.0)
+                    if (Keyboard.GetState().IsKeyDown(instance.settings.bindLeft))
+                    {
+                        if (!flag)
+                        {
+                            this.SetAnimation(this.WestFacingAnim);
+                            flag = true;
+                        }
+                        this.velocity.X = -this.MovementSpeed;
+                    }
+                    if (Keyboard.GetState().IsKeyDown(instance.settings.bindRight))
+                    {
+                        if (!flag)
+                        {
+                            this.SetAnimation(this.EastFacingAnim);
+                            flag = true;
+                        }
+                        this.velocity.X = this.MovementSpeed;
+                    }
+
+                    if (Keyboard.GetState().IsKeyDown(Keys.Space) && this.position.Z <= 0.0f)
                         this.jump();
+
+
+                    // Camera Zoom (Unnecessary, but will likely keep)
                     if (Keyboard.GetState().IsKeyDown(Keys.OemPlus))
-                        Game1.getInstance().mainCamera.zoomOut();
+                        game.GetCamera().zoomOut();
+
                     if (Keyboard.GetState().IsKeyDown(Keys.OemMinus))
-                        Game1.getInstance().mainCamera.zoomIn();
+                        game.GetCamera().zoomIn();
+
+                    // Moves the player.
                     Vector3 velocity = this.velocity;
-                    this.velocity.X = velocity.X * (float)Math.Abs(Math.Cos((double)velocity.Y * 0.785398163397448));
-                    this.velocity.Y = velocity.Y * (float)Math.Abs(Math.Cos((double)velocity.X * 0.785398163397448));
+                    this.velocity.X = velocity.X * (float)Math.Abs(Math.Cos(velocity.Y * 0.785398163397448));
+                    this.velocity.Y = velocity.Y * (float)Math.Abs(Math.Cos(velocity.X * 0.785398163397448));
+
+
                     if (this.currentAnimation != this.SwordSwingSouth && !flag)
                         this.currentAnimation.Stop();
                 }
             }
             else if (!this.currentAnimation.isActive() && this.currentAnimation == this.SwordSwingSouth)
                 this.currentAnimation = this.SouthFacingAnim;
-            Vector2 positionRelativeToWorld = Game1.getInstance().mainCamera.getMousePositionRelativeToWorld();
-            if ((double)positionRelativeToWorld.Y - (double)this.position.Y < 0.0)
-                this.facing = Direction.NORTH;
-            else if ((double)positionRelativeToWorld.Y - (double)this.position.Y > 0.0)
-                this.facing = Direction.SOUTH;
-            if ((double)positionRelativeToWorld.X - (double)this.position.X > 0.0)
-                this.facing = Direction.EAST;
-            else if ((double)positionRelativeToWorld.X - (double)this.position.X < 0.0)
-                this.facing = Direction.WEST;
-            if (Game1.getInstance().mouseHelper.getLeftClicked() && this.CurrentItem != null)
-                this.CurrentItem.getItem().Use((LivingEntity)this, gameTime);
+
+            // Player using Item.
+            if (game.GetMouseHelper().getLeftClicked() && this.CurrentItem != null)
+            {
+                Vector2 positionRelativeToWorld = game.GetCamera().getMousePositionRelativeToWorld(game.GetMouseHelper());
+                if (positionRelativeToWorld.Y - this.position.Y < 0.0f)
+                    this.facing = Direction.NORTH;
+                else if (positionRelativeToWorld.Y - this.position.Y > 0.0f)
+                    this.facing = Direction.SOUTH;
+                if (positionRelativeToWorld.X - this.position.X > 0.0f)
+                    this.facing = Direction.EAST;
+                else if (positionRelativeToWorld.X - this.position.X < 0.0f)
+                    this.facing = Direction.WEST;
+                this.CurrentItem.getItem().Use(this, gameTime);
+            }
         }
     }
 }

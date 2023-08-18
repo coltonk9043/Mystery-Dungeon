@@ -5,6 +5,7 @@
 // Assembly location: C:\Users\Colton's PC\Documents\Games\Dungeon\Dungeon\bin\Debug\netcoreapp3.1\DungeonGame.dll
 
 using DungeonGame.Entities.Player;
+using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 
 namespace DungeonGame.Entities.Enemies
@@ -16,8 +17,8 @@ namespace DungeonGame.Entities.Enemies
         public Vector3 spawnLocation;
         private bool findPathOnce = true;
 
-        public EnemyEntity(Vector3 position)
-          : base(position)
+        public EnemyEntity(World world, Vector3 position)
+          : base(world, position)
         {
             this.spawnLocation = position;
         }
@@ -32,15 +33,15 @@ namespace DungeonGame.Entities.Enemies
                 Vector3 vector3 = this.currentAgro.position - this.position;
                 vector3.Normalize();
                 this.velocity = vector3 * this.MovementSpeed;
-                if (this.distanceFromEntity((Entity)this.currentAgro) >this.agroRange)
+                if (this.DistanceFromEntity((Entity)this.currentAgro) >this.agroRange)
                     this.currentAgro = null;
             }
             else
             {
                 this.velocity = new Vector3(0.0f, 0.0f, 0.0f);
-                foreach (AbstractPlayer player in Game1.getInstance().currentWorld.getPlayers())
+                foreach (AbstractPlayer player in Game1.getInstance().GetWorld().getPlayers())
                 {
-                    if ((double)this.distanceFromEntity((Entity)player) <= (double)this.agroRange)
+                    if ((double)this.DistanceFromEntity((Entity)player) <= (double)this.agroRange)
                     {
                         this.currentAgro = player;
                     }
@@ -48,7 +49,7 @@ namespace DungeonGame.Entities.Enemies
             }
         }
 
-        public override void handleCollision(Entity entity)
+        public override void HandleCollision(Entity entity)
         {
             if (!(entity is ClientPlayer))
                 return;

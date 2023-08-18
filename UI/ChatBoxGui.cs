@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
-using System.Text;
 
 namespace Dungeon.UI
 {
@@ -13,10 +12,14 @@ namespace Dungeon.UI
         Stack<String> messages;
         private Texture2D texture;
 
+        // Message specific features
+        private double timeLastMessage = 0.0;
+        private float alpha = 1.0f;
+        private bool messageAddedRecently = false;
 
-        public ChatBoxGui(Gui parent, SpriteFont font) : base(parent, font)
+        public ChatBoxGui(GenericGame game, Gui parent, SpriteFont font) : base(game, parent, font)
         {
-            this.texture = Game1.getInstance().contentManager.Load<Texture2D>("Textures/chatBox");
+            this.texture = game.GetContentManager().Load<Texture2D>("Textures/chatBox");
             messages = new Stack<String>();
             messages.Push("Cocolots: first!");
             messages.Push("Penji: second!");
@@ -25,20 +28,26 @@ namespace Dungeon.UI
 
         public override void Draw(SpriteBatch spriteBatch, SpriteFont font)
         {
-            spriteBatch.Draw(this.texture, new Rectangle(4, Game1.ScreenHeight / 2 - 100, 320, 256), Color.White);
+            spriteBatch.Draw(this.texture, new Rectangle(4, game.ScreenHeight / 2 - 100, 320, 256), new Color(Color.White, alpha));
             int offset = 0;
             for(int i = messages.Count - 1; i >= 0; i--) 
             {
-                spriteBatch.DrawString(font, messages.ToArray()[i], new Vector2(24f, (Game1.ScreenHeight / 2) + 116 - offset), Color.White);
+                spriteBatch.DrawString(font, messages.ToArray()[i], new Vector2(24f, (game.ScreenHeight / 2) + 116 - offset), Color.White);
                 offset += 24;   
             }
         }
 
         public override void Update(GameTime gameTime, MouseHelper mouseHelper)
         {
-            if(messages.Count > 5)
+            if (messageAddedRecently)
             {
-                messages.Pop();
+                timeLastMessage = gameTime.TotalGameTime.TotalMilliseconds;
+                messageAddedRecently = false;
+            }
+
+            if(alpha > 0.0 && gameTime.TotalGameTime.TotalMilliseconds - timeLastMessage > 5000)
+            {
+                alpha = Math.Clamp(alpha - 0.10f, 0.0f, 1.0f);
             }
         }
 
@@ -50,6 +59,8 @@ namespace Dungeon.UI
         public void addMessage(String message)
         {
             this.messages.Push(message);
+            messageAddedRecently = true;
+            
         }
     }
 }

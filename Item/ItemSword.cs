@@ -8,6 +8,7 @@ using DungeonGame.Entities;
 using DungeonGame.Entities.Player;
 using Microsoft.Xna.Framework;
 using static DungeonGame.Entities.Entity;
+using BoundingBox = DungeonGame.Entities.BoundingBox;
 
 namespace DungeonGame.Item
 {
@@ -33,10 +34,10 @@ namespace DungeonGame.Item
       if (user is AbstractPlayer)
       {
         AbstractPlayer abstractPlayer = (AbstractPlayer) user;
-        user.setAnimation(abstractPlayer.SwordSwingSouth);
+        user.SetAnimation(abstractPlayer.SwordSwingSouth);
       }
-      DungeonGame.Entities.BoundingBox areaOfEffect = this.getAreaOfEffect((Entity) user);
-      foreach (Entity entity in Game1.getInstance().currentWorld.getEntities())
+      BoundingBox areaOfEffect = this.GetAreaOfEffect((Entity) user);
+      foreach (Entity entity in Game1.getInstance().GetWorld().getEntities())
       {
         if (entity is LivingEntity && entity != user)
         {
@@ -47,23 +48,23 @@ namespace DungeonGame.Item
       }
     }
 
-    public DungeonGame.Entities.BoundingBox getAreaOfEffect(Entity user)
+    public BoundingBox GetAreaOfEffect(Entity user)
     {
       Vector3 position = user.position;
-      DungeonGame.Entities.BoundingBox boundingBox = new DungeonGame.Entities.BoundingBox(position.X - (float) (this.getTexture().Width / 2), position.Y - 64f, (float) this.getTexture().Width, (float) (this.getTexture().Height + 64));
+      BoundingBox boundingBox = new BoundingBox(position.X - (float) (this.getTexture().Width / 2), position.Y - 64f, (float) this.getTexture().Width, (float) (this.getTexture().Height + 64));
       switch (user.facing)
       {
         case Direction.NORTH:
-          boundingBox = new DungeonGame.Entities.BoundingBox(position.X - (float) (this.getTexture().Width / 2), position.Y + (float) this.getTexture().Height, (float) this.getTexture().Width, (float) this.getTexture().Height);
+          boundingBox = new BoundingBox(position.X - (float) (this.getTexture().Width / 2), position.Y + (float) this.getTexture().Height, (float) this.getTexture().Width, (float) this.getTexture().Height);
           break;
         case Direction.EAST:
-          boundingBox = new DungeonGame.Entities.BoundingBox(position.X - 64f, position.Y + (float) (this.getTexture().Height / 2), (float) (this.getTexture().Width + 64), (float) this.getTexture().Height);
+          boundingBox = new BoundingBox(position.X - 64f, position.Y + (float) (this.getTexture().Height / 2), (float) (this.getTexture().Width + 64), (float) this.getTexture().Height);
           break;
         case Direction.SOUTH:
-          boundingBox = new DungeonGame.Entities.BoundingBox(position.X - (float) (this.getTexture().Width / 2), position.Y - 64f, (float) this.getTexture().Width, (float) (this.getTexture().Height + 64));
+          boundingBox = new BoundingBox(position.X - (float) (this.getTexture().Width / 2), position.Y - 64f, (float) this.getTexture().Width, (float) (this.getTexture().Height + 64));
           break;
         case Direction.WEST:
-          boundingBox = new DungeonGame.Entities.BoundingBox(position.X - (float) this.getTexture().Width, position.Y + (float) (this.getTexture().Height / 2), (float) this.getTexture().Width, (float) this.getTexture().Height);
+          boundingBox = new BoundingBox(position.X - (float) this.getTexture().Width, position.Y + (float) (this.getTexture().Height / 2), (float) this.getTexture().Width, (float) this.getTexture().Height);
           break;
       }
       return boundingBox;

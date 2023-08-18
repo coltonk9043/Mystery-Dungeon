@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Audio;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using System;
 
@@ -14,31 +15,33 @@ namespace DungeonGame.UI.Widgets
         private Texture2D mouseOverTexture;
         private SoundEffect effect;
 
-        public ButtonWidget(Rectangle position, string text, SpriteFont font, Action func)
-          : base(position, Game1.getInstance().contentManager.Load<Texture2D>("Textures/button_48x16"))
+        public ButtonWidget(ContentManager content, Rectangle position, string text, SpriteFont font, Action func)
+          : base(content, position)
         {
-            this.mouseOffTexture = Game1.getInstance().contentManager.Load<Texture2D>("Textures/button_48x16");
-            this.mouseOverTexture = Game1.getInstance().contentManager.Load<Texture2D>("Textures/button_48x16_mouseOver");
             this.text = text;
             this.textSize = font.MeasureString(text);
             this.pressedAction = func;
-            this.effect = Game1.getInstance().contentManager.Load<SoundEffect>("Sounds/buttonClick");
         }
 
-        public ButtonWidget(
+        public ButtonWidget(ContentManager content,
           Rectangle position,
           string texture,
           string text,
           SpriteFont font,
           Action func)
-          : base(position, Game1.getInstance().contentManager.Load<Texture2D>(texture))
+          : base(content, position)
         {
-            this.mouseOffTexture = Game1.getInstance().contentManager.Load<Texture2D>(texture);
-            this.mouseOverTexture = Game1.getInstance().contentManager.Load<Texture2D>(texture + "_mouseOver");
             this.text = text;
             this.textSize = font.MeasureString(text);
             this.pressedAction = func;
-            this.effect = Game1.getInstance().contentManager.Load<SoundEffect>("Sounds/buttonClick");
+        }
+
+        public override void Load(ContentManager contentManager)
+        {
+            this.texture = contentManager.Load<Texture2D>("Textures/button_48x16");
+            this.mouseOffTexture = contentManager.Load<Texture2D>("Textures/button_48x16");
+            this.mouseOverTexture = contentManager.Load<Texture2D>("Textures/button_48x16_mouseOver");
+            this.effect = contentManager.Load<SoundEffect>("Sounds/buttonClick");
         }
 
         public override void Update(GameTime gameTime, MouseHelper mouseHelper)
