@@ -1,5 +1,6 @@
 ﻿// Colton K
 // NPC representing David.
+using Dungeon.Utilities;
 using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +12,7 @@ namespace DungeonGame.Entities.NPCs
     {
         public NPCDavid(World world, Vector3 position) : base(world, position)
         {
-            this.texture = TextureUtils.create2DTextureArrayFromFile("Textures/NPCs/david", 16, 24)[0, 0];
+            this.texture = TextureUtils.create2DTextureArrayFromFile(this.world.GetCurrentGame().Content, "Textures/NPCs/david", 16, 24)[0, 0];
             this.animated = false;
             this.boundingBox = new DungeonGame.Entities.BoundingBox(this.position.X, this.position.Y, 16f, 24f);
             this.portrait = Game1.getInstance().GetContentManager().Load<Texture2D>("Textures/NPCs/david_portrait");

@@ -22,11 +22,6 @@ namespace Dungeon.UI.Widgets.Lists
             this.children = new List<T>();
         }
 
-        public override void Load(ContentManager contentManager)
-        {
-            throw new NotImplementedException();
-        }
-
         public override void Update(GameTime gameTime, MouseHelper mouseHelper)
         {
             throw new NotImplementedException();
@@ -36,6 +31,7 @@ namespace Dungeon.UI.Widgets.Lists
         {
             throw new NotImplementedException();
         }
+
 
         public T getSelected(){ return this.selected; }
 
@@ -53,6 +49,10 @@ namespace Dungeon.UI.Widgets.Lists
 
         public void setAmount(int amount) { this.scrollAmount = amount; }
 
+        public override void Load(ContentManager contentManager)
+        {
+            throw new NotImplementedException();
+        }
     }
  
 }

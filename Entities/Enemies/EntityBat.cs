@@ -1,4 +1,5 @@
 ﻿using Dungeon.Entities;
+using Dungeon.Utilities;
 using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +12,7 @@ namespace DungeonGame.Entities.Enemies
         public EntityBat(World world, Vector3 position)
           : base(world, position)
         {
-            Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile("Textures/Enemies/bat", 24, 16);
+            Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile(this.world.GetCurrentGame().Content, "Textures/Enemies/bat", 24, 16);
 
             this.SouthFacingAnim = new Animation(new Texture2D[2]
             {

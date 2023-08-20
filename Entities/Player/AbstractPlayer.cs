@@ -1,4 +1,5 @@
-﻿using DungeonGame.Levels;
+﻿using Dungeon.Utilities;
+using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
@@ -23,7 +24,7 @@ namespace DungeonGame.Entities.Player
           : base(world, position)
         {
             this.texture = texture;
-            Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile("Textures/player_spritesheet", 16, 24);
+            Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile(this.world.GetCurrentGame().Content, "Textures/player_spritesheet", 16, 24);
             this.NorthFacingAnim = new Animation(new Texture2D[4]
             {
         texture2DArray[0, 2],

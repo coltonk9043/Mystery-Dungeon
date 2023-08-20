@@ -21,6 +21,7 @@ using Dungeon.Projectiles;
 using System.Linq;
 using Dungeon.Utilities;
 using System.Diagnostics;
+using Dungeon;
 
 namespace DungeonGame.Levels
 {
@@ -35,7 +36,7 @@ namespace DungeonGame.Levels
 
     public class World
     {
-        private Game1 game;
+        private GenericGame game;
 
         // Render Targets
         private RenderTarget2D renderTargetShadows;
@@ -48,7 +49,7 @@ namespace DungeonGame.Levels
         private Effect lightingEffect;
         private VertexPosition[] lightingVAO;
 
-        
+
         // Map Information
         private string dungeonName;
         public int sizeX;
@@ -63,7 +64,7 @@ namespace DungeonGame.Levels
 
         // Realtime Lighting Variables
         private float time = 0.0f;
-        private Color skyColor = new Color(255,255,255);
+        private Color skyColor = new Color(255, 255, 255);
         private float skyAlpha;
         private const int rays = 360;
         int[] ind = new int[(rays + 2) * 3]; // Real-time Lighting Indices
@@ -87,9 +88,9 @@ namespace DungeonGame.Levels
         /// <param name="width"></param>
         /// <param name="height"></param>
         /// <param name="layers"></param>
-        public World(string dungeonName, int width, int height)
+        public World(GenericGame game, string dungeonName, int width, int height)
         {
-            this.game = Game1.getInstance();
+            this.game = game;
             this.dungeonName = dungeonName;
             this.renderTargetShadows = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             this.renderTargetWorld = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
@@ -105,7 +106,8 @@ namespace DungeonGame.Levels
 
             // Creates new layers.
 
-            this.tiles = new Layer[Enum.GetNames(typeof(Layers)).Length];
+            this.layers = Enum.GetNames(typeof(Layers)).Length;
+            this.tiles = new Layer[layers];
             for (int i = 0; i < this.tiles.Length; i++)
             {
                 tiles[i] = new Layer(width, height, false, false);
@@ -119,15 +121,15 @@ namespace DungeonGame.Levels
             }
             this.tilesetTextureFile = "Textures/Tiles/default_floor_tileset";
 
-            this.tileTextures = TextureUtils.createTextureArrayFromFile(this.tilesetTextureFile, 16, 16);
+            this.tileTextures = TextureUtils.createTextureArrayFromFile(game.Content, this.tilesetTextureFile, 16, 16);
 
             // Precalculates shadow indicices for efficiency.
-            for (int i = 0; i < rays; i++)
+/*            for (int i = 0; i < rays; i++)
             {
                 ind[(i * 3)] = 0;
                 ind[(i * 3) + 1] = i;
                 ind[(i * 3) + 2] = i + 1;
-            }
+            }*/
         }
 
         /// <summary>
@@ -136,10 +138,10 @@ namespace DungeonGame.Levels
         /// <param name="dungeonName"></param>
         /// <param name="game"></param>
         /// <param name="contentManager"></param>
-        public World(string dungeonName)
+        public World(GenericGame game, string dungeonName)
         {
             WriteDefaultValues(dungeonName);
-            this.game = Game1.getInstance(); ;
+            this.game = game;
             this.dungeonName = dungeonName;
             this.renderTargetShadows = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
             this.renderTargetWorld = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
@@ -169,7 +171,7 @@ namespace DungeonGame.Levels
                         tiles[i] = new Layer(this.sizeX, this.sizeY, binaryReader.ReadBoolean(), binaryReader.ReadBoolean());
 
                     // Creates a texture array containing every texture used in the world.
-                    this.tileTextures = TextureUtils.createTextureArrayFromFile(this.tilesetTextureFile, 16, 16);
+                    this.tileTextures = TextureUtils.createTextureArrayFromFile(game.Content, this.tilesetTextureFile, 16, 16);
 
                     // Reads the file for the world data.
                     for (int layer = 0; layer < layers; layer++)
@@ -249,38 +251,6 @@ namespace DungeonGame.Levels
             this.addEntity((Entity)new ItemEntity(this, new Vector3(300f, 275f, 0.0f), Game1.Items.GetItem("tungsten_knife")));
         }
 
-        public World(int width, int height, int numLayers, Layer[] layers)
-        {
-            this.game = Game1.getInstance();
-            this.dungeonName = dungeonName;
-            this.renderTargetShadows = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.renderTargetWorld = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.renderTargetEntities = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.renderTargetDynamicLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.renderTargetStaticLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.renderTargetLighting = new RenderTarget2D(game.GraphicsDevice, game.GraphicsDevice.PresentationParameters.BackBufferWidth, game.GraphicsDevice.PresentationParameters.BackBufferHeight, false, SurfaceFormat.Color, DepthFormat.None, 0, RenderTargetUsage.DiscardContents);
-            this.shadowMask = game.GetContentManager().Load<Effect>("ShadowMask");
-            this.lightingEffect = game.GetContentManager().Load<Effect>("Lighting");
-            this.lightingTexture = game.GetContentManager().Load<Texture2D>("Textures/Lighting/Torch");
-            this.sizeX = width;
-            this.sizeY = height;
-            this.layers = numLayers;
-
-            this.tilesetTextureFile = "Textures/Tiles/default_floor_tileset";
-
-            this.tileTextures = TextureUtils.createTextureArrayFromFile(this.tilesetTextureFile, 16, 16);
-
-            // Precalculates shadow indicices for efficiency.
-            for (int i = 0; i < rays; i++)
-            {
-                ind[(i * 3)] = 0;
-                ind[(i * 3) + 1] = i;
-                ind[(i * 3) + 2] = i + 1;
-            }
-
-            this.tiles = layers;
-        }
-
         /// <summary>
         /// Saves the current world. TODO: Change to be specific to the World Editor GUI.
         /// </summary>
@@ -308,7 +278,14 @@ namespace DungeonGame.Levels
             }
         }
 
-
+        /// <summary>
+        /// Function 
+        /// </summary>
+        /// <returns></returns>
+        public GenericGame GetCurrentGame()
+        {
+            return this.game;
+        }
 
         /// <summary>
         /// Toggles the gridmap on or off.
@@ -339,7 +316,7 @@ namespace DungeonGame.Levels
             if (this.time >= 0.0 && this.time < 4000.0)
             {
                 this.skyColor = new Color((int)(81.0 + 174.0 * (this.time / 4000.0)), (int)(81.0 + 174.0 * (this.time / 4000.0)), (int)(81.0 + 174.0 * (this.time / 4000.0)));
-               this.skyAlpha = 255.0f;
+                this.skyAlpha = 255.0f;
             }
             else if (this.time >= 12000.0 && this.time < 18000.0)
             {
@@ -360,24 +337,18 @@ namespace DungeonGame.Levels
             // Creates a list of entities to be removed (In the case of a despawn or death)
             List<Entity> removeList = new List<Entity>();
 
-            // If the world editor is active, update only the player.
-            if (Game1.getInstance().worldEditor)
+
+            // Otherwise, update every entity in the world and determine whether or not it needs to be removed.
+            foreach (Entity entity in this.entityList.ToList())
             {
-                Game1.getInstance().player.Update(gameTime, this);
+                entity.Update(gameTime, this);
+                if (entity.removed)
+                    removeList.Add(entity);
             }
-            else
-            {
-                // Otherwise, update every entity in the world and determine whether or not it needs to be removed.
-                foreach (Entity entity in this.entityList.ToList())
-                {
-                    entity.Update(gameTime, this);
-                    if (entity.removed)
-                        removeList.Add(entity);
-                }
-                // Remove each entity that must be removed.
-                foreach (Entity entity in removeList)
-                    this.entityList.Remove(entity);
-            }
+            // Remove each entity that must be removed.
+            foreach (Entity entity in removeList)
+                this.entityList.Remove(entity);
+
         }
 
         /// <summary>
@@ -385,7 +356,7 @@ namespace DungeonGame.Levels
         /// </summary>
         /// <param name="spriteBatch"></param>
         /// <param name="camera"></param>
-        public void Draw(MatrixStack matrixStack, SpriteBatch spriteBatch, Camera camera)
+        public void Draw(SpriteBatch spriteBatch, Camera camera)
         {
             // Tile Rendering variables.
             Vector2 entityPosAsTilePos = camera.GetEntityPosAsTilePos();
@@ -393,14 +364,13 @@ namespace DungeonGame.Levels
             int maxX = (int)MathHelper.Min((float)this.sizeX, entityPosAsTilePos.X + 18f);
             int minY = (int)MathHelper.Max(0.0f, entityPosAsTilePos.Y - 8f);
             int maxY = (int)MathHelper.Min((float)this.sizeY, entityPosAsTilePos.Y + 9f);
-            Vector2 playerPos = new Vector2(Game1.getInstance().player.position.X, Game1.getInstance().player.position.Y);
 
             // Gets all of the collidable bounding tiles, such that light will render around it.
             List<Edge> boundingList = new List<Edge> { new Edge(0, 0, sizeX * 16, 0), new Edge(sizeX * 16, 0, sizeX * 16, sizeY * 16), new Edge(0, sizeY * 16, sizeX * 16, sizeY * 16), new Edge(0, 0, 0, sizeY * 16) };
 
             // Renders the entity "Shadow" layer.
             spriteBatch.GraphicsDevice.SetRenderTarget(this.renderTargetShadows);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, transformMatrix: matrixStack.Peek());
+            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, transformMatrix: camera.GetTransform());
             spriteBatch.GraphicsDevice.Clear(Color.Transparent);
             foreach (Entity entity in this.entityList)
             {
@@ -421,9 +391,9 @@ namespace DungeonGame.Levels
             spriteBatch.End();
 
             // Render the realtime shadows.
-            spriteBatch.GraphicsDevice.SetRenderTarget(this.renderTargetDynamicLighting);
-            spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, transformMatrix: new Matrix?(camera.GetTransform()));
-            spriteBatch.GraphicsDevice.Clear(Color.White);
+            /* spriteBatch.GraphicsDevice.SetRenderTarget(this.renderTargetDynamicLighting);
+             spriteBatch.Begin(SpriteSortMode.Immediate, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise, transformMatrix: new Matrix?(camera.GetTransform()));
+             spriteBatch.GraphicsDevice.Clear(Color.White);*/
 
             // TODO: Cleanup so that this is not created each draw call.
             /*for (int x = minX; x < maxX; x++)
@@ -448,11 +418,11 @@ namespace DungeonGame.Levels
             }*/
 
             // Calculates each vertice for the realtime light rays using raytracing.
-            var vertices = new VertexPosition[rays + 1];
-            vertices[0].Position = new Vector3(playerPos.X, playerPos.Y, 0);
+            /*var vertices = new VertexPosition[rays + 1];
+            vertices[0].Position = new Vector3(camera.position.X, camera.position.Y, 0);
             for (int i = 1; i <= rays; i += 1)
             {
-                Ray ray = new Ray(playerPos, (Math.PI / 180) * (i - 1));
+                Ray ray = new Ray(new Vector2(camera.position.X, camera.position.Y), (Math.PI / 180) * (i - 1));
                 IntersectionPoint point = ray.simulate(boundingList);
                 // If a point of intersection exists, create a new vertice.
                 if (point != null)
@@ -461,7 +431,7 @@ namespace DungeonGame.Levels
                 }
             }
             spriteBatch.GraphicsDevice.DrawUserIndexedPrimitives<VertexPosition>(PrimitiveType.TriangleStrip, vertices, 0, rays, ind, 0, rays * 3);
-            spriteBatch.End();
+            spriteBatch.End();*/
 
 
             // Render World
@@ -505,12 +475,12 @@ namespace DungeonGame.Levels
             float[] lightIntensity = new float[32];
             float[] lightRadius = new float[32];
             int currentLightIndex = 0;
-            
+
             foreach (Entity entity in this.entityList)
             {
                 if (camera.EuclidianDistanceFromEntity(entity) <= 300.0)
                     entity.Render(spriteBatch);
-                if(entity is ILightSource)
+                if (entity is ILightSource)
                 {
                     if (currentLightIndex >= 32) continue;
                     lightPosition[currentLightIndex] = Vector3.Transform(entity.position, this.game.GetCamera().GetLightingTransform());
@@ -524,8 +494,8 @@ namespace DungeonGame.Levels
 
             for (int i = currentLightIndex; i < 32; i++)
             {
-                lightPosition[currentLightIndex] = new Vector3(0,0,0);
-                lightColour[currentLightIndex] = new Vector4(0,0,0,0);
+                lightPosition[currentLightIndex] = new Vector3(0, 0, 0);
+                lightColour[currentLightIndex] = new Vector4(0, 0, 0, 0);
                 lightIntensity[currentLightIndex] = 0.0f;
                 lightRadius[currentLightIndex] = 0.0f;
             }
@@ -536,8 +506,6 @@ namespace DungeonGame.Levels
             // Sort Lighting to be 
 
             this.lightingEffect.Parameters["DiffuseLighting"].SetValue(this.skyColor.ToVector4());
-            //this.lightingEffect.Parameters["DiffuseLighting"].SetValue(new Vector4(255,255,255,255));
-
             this.lightingEffect.Parameters["LightPosition"].SetValue(lightPosition);
             this.lightingEffect.Parameters["LightColour"].SetValue(lightColour);
             this.lightingEffect.Parameters["LightIntensity"].SetValue(lightIntensity);

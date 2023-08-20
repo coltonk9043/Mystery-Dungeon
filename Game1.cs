@@ -40,12 +40,6 @@ namespace DungeonGame
         private PauseMenu pauseMenu;
         private IngameGui ingameGui;
 
-        // World Editor specific variables.
-        private WorldEditGui worldEditGui;
-        public bool worldEditor = false;
-        public int currentTile = 0;
-        public int currentLayer = 0;
-
         public static Effect _blur;
 
         public Game1() : base()
@@ -62,6 +56,7 @@ namespace DungeonGame
         {
             base.LoadAssets();
 
+            this.currentWorld = new DungeonGame.Levels.World(this, "dev");
             this.player = new ClientPlayer(this, this.currentWorld, this.Content.Load<Texture2D>("Textures/player"), new Vector3(20f, 50f, 0.0f));
             this.pauseMenu = new PauseMenu(this, null, this.font);
             this.pauseMenu.Load(this.contentManager);
@@ -122,23 +117,7 @@ namespace DungeonGame
 
             this.mainCamera.Update(this.graphics, gameTime);
             this.currentWorld.Update(gameTime);
-            if (this.worldEditor)
-            {
-                this.worldEditGui.Update(gameTime, this.mouseHelper);
-                float scrollOffset = this.mouseHelper.getScrollOffset();
-
-                if (scrollOffset > 0.0f)
-                    this.currentTile = Math.Min(this.currentWorld.getTileTextures().Length - 1, Math.Max(0, this.currentTile - 1));
-                else if (scrollOffset < 0.0f)
-                    this.currentTile = Math.Min(this.currentWorld.getTileTextures().Length - 1, Math.Max(0, this.currentTile + 1));
-
-                if (!this.mouseHelper.getLeftDown())
-                    return;
-                Vector2 positionRelativeToWorld = this.mainCamera.getMousePositionRelativeToWorld(this.mouseHelper);
-                this.currentWorld.setTile(0, (int)positionRelativeToWorld.X / 16, (int)(positionRelativeToWorld.Y / 16.0) + 1, this.currentTile);
-            }
-            else
-                this.ingameGui.Update(gameTime, this.mouseHelper);
+            this.ingameGui.Update(gameTime, this.mouseHelper);
         }
 
         public void FixedUpdateGame(GameTime gameTime)
@@ -152,18 +131,11 @@ namespace DungeonGame
         public void RenderGame(GameTime gameTime)
         {
             // Render World.
-            matrixStack.Push();
-            matrixStack.Multiply(this.mainCamera.GetTransform());
-            this.currentWorld.Draw(this.matrixStack, this.spriteBatch, this.mainCamera);
-            matrixStack.Pop();
+            this.currentWorld.Draw(this.spriteBatch, this.mainCamera);
 
             this.spriteBatch.Begin(blendState: BlendState.AlphaBlend, samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.None, rasterizerState: RasterizerState.CullCounterClockwise);
-            if (this.worldEditor)
-                this.worldEditGui.Draw(this.spriteBatch, this.font);
-            else
-                this.ingameGui.Draw(this.spriteBatch, this.font);
+            this.ingameGui.Draw(this.spriteBatch, this.font);
             this.spriteBatch.End();
-            
         }
 
         public void exit() => this.Exit();

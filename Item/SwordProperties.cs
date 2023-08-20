@@ -11,6 +11,8 @@
         private float poison;
         private float slowdown;
 
+        
+
         public SwordProperties(int dmg, float critrate, float speed)
         {
             this.dmg = dmg;

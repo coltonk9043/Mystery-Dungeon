@@ -11,16 +11,15 @@ namespace DungeonGame.UI.Widgets
 
         public Widget(ContentManager content, Rectangle position, Texture2D texture)
         {
-            this.Load(content);
             this.position = position;
             this.texture = texture;
+            this.Load(content);
         }
 
         public Widget(ContentManager content, Rectangle position)
         {
-            this.Load(content);
             this.position = position;
-            this.texture = (Texture2D)null;
+            this.Load(content);
         }
 
         public abstract void Load(ContentManager contentManager);

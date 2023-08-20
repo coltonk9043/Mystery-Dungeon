@@ -151,7 +151,7 @@ namespace DungeonGame
             return new Vector2((float)state.X, (float)state.Y);
         }
 
-        public float getScrollOffset() => this.scrollOffset;
+        public int getScrollOffset() => this.scrollOffset;
 
         public bool getLeftClicked() => this.leftClicked;
 

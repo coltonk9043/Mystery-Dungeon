@@ -10,6 +10,7 @@ namespace DungeonGame.UI.Menus
 {
     internal class CreateWorldMenu : Gui
     {
+        private GenericGame game;
         private LabelWidget createWorldLabel;
         private LabelWidget xLabel;
         private LabelWidget yLabel;
@@ -24,6 +25,7 @@ namespace DungeonGame.UI.Menus
         public CreateWorldMenu(GenericGame game, Gui parent, SpriteFont font)
           : base(game, parent, font)
         {
+            this.game = game;
             this.isIngame = false;
             this.createWorldLabel = new LabelWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 48, 80, 320, 48), "Create World", game.GetFont());
             this.worldNameLabel = new LabelWidget(game.GetContentManager(), new Rectangle(game.ScreenWidth / 2 - 210, 110, 320, 48), "Name:", game.GetFont());
@@ -61,12 +63,11 @@ namespace DungeonGame.UI.Menus
 
         public void CreateNewWorld()
         {
-            
-            
             int width = Int32.Parse(this.xField.getText());
             int height = Int32.Parse(this.yField.getText());
-            game.SetWorld(new World(this.worldNameField.getText(), width, height));
-            game.SetCurrentScreen(null);
+
+            GenericGame game = new WorldEditor(this.worldNameField.getText(), width, height);
+            game.Run();
         }
     }
 }

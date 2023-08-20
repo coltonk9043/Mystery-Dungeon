@@ -1,9 +1,11 @@
 ﻿// Colton K
 // A class that is used to prepare Textures for rendering.
+using DungeonGame;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 
-namespace DungeonGame
+namespace Dungeon.Utilities
 {
     internal static class TextureUtils
     {
@@ -14,14 +16,14 @@ namespace DungeonGame
         /// <param name="sizeX"></param>
         /// <param name="sizeY"></param>
         /// <returns></returns>
-        public static Texture2D[] createTextureArrayFromFile(string fileName, int sizeX, int sizeY)
+        public static Texture2D[] createTextureArrayFromFile(ContentManager contentManager, string fileName, int sizeX, int sizeY)
         {
-            Texture2D texture2D1 = Game1.getInstance().GetContentManager().Load<Texture2D>(fileName);
+            Texture2D texture2D1 = contentManager.Load<Texture2D>(fileName);
             int num1 = texture2D1.Width / sizeX;
             int num2 = texture2D1.Height / sizeY;
             Texture2D[] texture2DArray = new Texture2D[num1 * num2];
             Color[] data1 = new Color[texture2D1.Width * texture2D1.Height];
-            texture2D1.GetData<Color>(data1);
+            texture2D1.GetData(data1);
             int num3 = 0;
             for (int y = 0; y < num2; ++y)
             {
@@ -36,7 +38,7 @@ namespace DungeonGame
                         for (int index4 = 0; index4 < sizeY; ++index4)
                             data2[index4 + index3 * sizeY] = data1[num4 + index4 + (num5 + index3) * texture2D1.Width];
                     }
-                    texture2D2.SetData<Color>(data2);
+                    texture2D2.SetData(data2);
                     texture2DArray[num3++] = texture2D2;
                 }
             }
@@ -50,14 +52,14 @@ namespace DungeonGame
         /// <param name="sizeX"></param>
         /// <param name="sizeY"></param>
         /// <returns></returns>
-        public static Texture2D[,] create2DTextureArrayFromFile(string fileName, int sizeX, int sizeY)
+        public static Texture2D[,] create2DTextureArrayFromFile(ContentManager contentManager, string fileName, int sizeX, int sizeY)
         {
             Texture2D texture2D1 = Game1.getInstance().GetContentManager().Load<Texture2D>(fileName);
             int length1 = texture2D1.Width / sizeX;
             int length2 = texture2D1.Height / sizeY;
             Texture2D[,] texture2DArray = new Texture2D[length1, length2];
             Color[] data1 = new Color[texture2D1.Width * texture2D1.Height];
-            texture2D1.GetData<Color>(data1);
+            texture2D1.GetData(data1);
             for (int index1 = 0; index1 < length2; ++index1)
             {
                 for (int index2 = 0; index2 < length1; ++index2)
@@ -72,7 +74,7 @@ namespace DungeonGame
                         int num4 = index3 / sizeX;
                         data2[index3] = data1[num1 + num3 + texture2D1.Width * num2 + texture2D1.Width * num4];
                     }
-                    texture2D2.SetData<Color>(data2);
+                    texture2D2.SetData(data2);
                     texture2DArray[index2, index1] = texture2D2;
                 }
             }

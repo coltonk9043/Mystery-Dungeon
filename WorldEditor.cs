@@ -8,11 +8,11 @@ using DungeonGame.UI.Menus;
 using DungeonGame.UI.Widgets;
 using DungeonGame.UI;
 using DungeonGame;
-using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using Microsoft.Xna.Framework;
 using DungeonGame.Entities;
+using System;
 
 namespace Dungeon
 {
@@ -20,16 +20,22 @@ namespace Dungeon
     {
         public ClientPlayer player;
         private PauseMenu pauseMenu;
-        private IngameGui ingameGui;
 
         // World Editor specific variables.
         private WorldEditGui worldEditGui;
         public int currentTile = 0;
         public int currentLayer = 0;
 
-        public WorldEditor() : base()
-        {
+        private int width;
+        private int height;
+        private string worldName;
 
+        
+        public WorldEditor(string worldName, int width, int height) : base()
+        {
+            this.width = width;
+            this.height = height;
+            this.worldName = worldName;
         }
 
         public Gui getCurrentScreen() => this.currentScreen;
@@ -38,12 +44,18 @@ namespace Dungeon
 
         protected override void LoadContent()
         {
+            base.LoadAssets();
+
             this.pauseMenu = new PauseMenu(this, null, this.font);
-            this.worldEditGui = new WorldEditGui(this, null, this.font);
+
+            this.SetWorld(new World(this, this.worldName, width, height));
+            this.mainCamera = new Camera(this, this.currentWorld, this.graphics);
+            this.worldEditGui = new WorldEditGui(this, null, this.font, this.GetWorld());
         }
 
         protected override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
             this.mouseHelper.Update();
             if (this.currentScreen != null)
             {
@@ -58,7 +70,6 @@ namespace Dungeon
             }
 
             this.UpdateGame(gameTime);
-            base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
@@ -75,7 +86,6 @@ namespace Dungeon
             else
                 this.RenderGame(gameTime);
             this.mouseHelper.Draw(this.spriteBatch);
-            base.Draw(gameTime);
         }
 
         public void UpdateGame(GameTime gameTime)
@@ -84,16 +94,27 @@ namespace Dungeon
                 this.currentScreen = this.pauseMenu;
 
             this.mainCamera.Update(this.graphics, gameTime);
-            this.currentWorld.Update(gameTime);
 
             this.worldEditGui.Update(gameTime, this.mouseHelper);
 
-            if (!this.mouseHelper.getLeftDown())
-                return;
-            Vector2 positionRelativeToWorld = this.mainCamera.getMousePositionRelativeToWorld(this.mouseHelper);
-            this.currentWorld.setTile(0, (int)positionRelativeToWorld.X / 16, (int)(positionRelativeToWorld.Y / 16.0) + 1, this.currentTile);
 
+            if (this.mouseHelper.getLeftDown())
+            {
+                Vector2 positionRelativeToWorld = this.mainCamera.getMousePositionRelativeToWorld(this.mouseHelper);
+                this.currentWorld.setTile(0, (int)positionRelativeToWorld.X / 16, (int)(positionRelativeToWorld.Y / 16.0) + 1, this.currentTile);
+            }
 
+            int scrollOffset = this.mouseHelper.getScrollOffset();
+
+            if(scrollOffset < 0){
+                this.currentTile = Math.Min(Math.Max(0, currentTile + 1), this.GetWorld().getTileTextures().Length - 1);
+                this.worldEditGui.SetTile(currentTile);
+            }
+            else if(scrollOffset > 0)
+            {
+                this.currentTile = Math.Min(Math.Max(0, currentTile - 1), this.GetWorld().getTileTextures().Length - 1);
+                this.worldEditGui.SetTile(currentTile);
+            }
         }
 
         public void FixedUpdateGame(GameTime gameTime)
@@ -107,19 +128,14 @@ namespace Dungeon
         public void RenderGame(GameTime gameTime)
         {
             // Render World.
-            matrixStack.Push();
-            matrixStack.Multiply(this.mainCamera.GetTransform());
-            this.currentWorld.Draw(this.matrixStack, this.spriteBatch, this.mainCamera);
-            matrixStack.Pop();
+            this.currentWorld.Draw(this.spriteBatch, this.mainCamera);
 
             this.spriteBatch.Begin(blendState: BlendState.AlphaBlend, samplerState: SamplerState.PointClamp, depthStencilState: DepthStencilState.None, rasterizerState: RasterizerState.CullCounterClockwise);
-
             this.worldEditGui.Draw(this.spriteBatch, this.font);
-
             this.spriteBatch.End();
 
         }
 
-        public void exit() => this.Exit();
+        public void Exit() => this.Exit();
     }
 }

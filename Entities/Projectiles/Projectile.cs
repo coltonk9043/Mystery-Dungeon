@@ -1,5 +1,5 @@
 ﻿using Dungeon.Entities;
-using DungeonGame;
+using Dungeon.Utilities;
 using DungeonGame.Entities;
 using DungeonGame.Levels;
 using Microsoft.Xna.Framework;
@@ -30,7 +30,7 @@ namespace Dungeon.Projectiles
             this.rotation = rotation;
             this.rotationVelocity = rotationVelocity;
 
-            Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile("Textures/fireball", 16, 16);
+            Texture2D[,] texture2DArray = TextureUtils.create2DTextureArrayFromFile(this.world.GetCurrentGame().Content, "Textures/fireball", 16, 16);
             this.animated = true;
             this.currentAnimation = new Animation(new Texture2D[4]
             {

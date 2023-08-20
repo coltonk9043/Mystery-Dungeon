@@ -14,10 +14,11 @@ namespace Dungeon.Levels
 
         private World w;
         private Random random = new Random();
+        private GenericGame game;
 
-
-        public WorldGenerator(int width, int height)
+        public WorldGenerator(GenericGame game, int width, int height)
         {
+            this.game = game;
             this.width = width;
             this.height = height;
         }
@@ -58,7 +59,7 @@ namespace Dungeon.Levels
 
             // Generates the 
 
-            w = new World(width, height, 4, tiles);
+            w = new World(game, "test", width, height);
             return w;
         }
 

@@ -104,6 +104,18 @@
 /processorParam:TextureFormat=Color
 /build:Textures/button_48x16_mouseOver.png
 
+#begin Textures/button_generic.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:Textures/button_generic.png
+
 #begin Textures/button_gridmap.png
 /importer:TextureImporter
 /processor:TextureProcessor

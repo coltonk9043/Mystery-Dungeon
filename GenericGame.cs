@@ -55,7 +55,6 @@ namespace Dungeon
 
         // Rendering Variables
         protected SpriteFont font;
-        protected MatrixStack matrixStack;
 
         public Settings settings;
 
@@ -66,7 +65,6 @@ namespace Dungeon
             this.IsMouseVisible = false;
             this.contentManager = this.Content;
             this.millisecond_interval = 1.0f / timeSteps;
-            this.matrixStack = new MatrixStack();
         }
 
         protected override void Initialize()
@@ -91,7 +89,7 @@ namespace Dungeon
             this.font = this.Content.Load<SpriteFont>("Arial");
             //_blur = this.Content.Load<Effect>("Blur");
             Game1.Items = new Items();
-            this.currentWorld = new DungeonGame.Levels.World("dev");
+
             //worldGenerator = new WorldGenerator(50, 50);
             //this.currentWorld = worldGenerator.Generate();
 
